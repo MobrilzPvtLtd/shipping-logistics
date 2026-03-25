@@ -1,0 +1,50 @@
+{
+    "name": "programmernomad/laracorekit-demo-module",
+    "description": "Auto-resetting demo environment for Laravel applications with Filament integration",
+    "keywords": ["laravel", "demo", "filament", "auto-reset", "laracorekit", "module"],
+    "license": "MIT",
+    "type": "library",
+    "homepage": "https://github.com/ProgrammerNomad/laracorekit-demo-module",
+    "support": {
+        "issues": "https://github.com/ProgrammerNomad/laracorekit-demo-module/issues",
+        "source": "https://github.com/ProgrammerNomad/laracorekit-demo-module"
+    },
+    "authors": [
+        {
+            "name": "ProgrammerNomad",
+            "homepage": "https://github.com/ProgrammerNomad"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0",
+        "illuminate/console": "^11.0|^12.0",
+        "illuminate/database": "^11.0|^12.0",
+        "illuminate/filesystem": "^11.0|^12.0"
+    },
+    "require-dev": {
+        "filament/filament": "^3.0",
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^9.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaraCoreKit\\DemoModule\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaraCoreKit\\DemoModule\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaraCoreKit\\DemoModule\\DemoServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

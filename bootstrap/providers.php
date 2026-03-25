@@ -1,0 +1,14 @@
+<?php
+
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\Filament\AdminPanelProvider::class,
+    App\Providers\Filament\SuperAdminPanelProvider::class,
+    App\Providers\Filament\WarehousePanelProvider::class,
+    Modules\Auth\AuthServiceProvider::class,
+    Modules\Core\CoreServiceProvider::class,
+    Modules\Blog\BlogServiceProvider::class,
+    Modules\Settings\SettingsServiceProvider::class,
+    Modules\UIShowcase\UIShowcaseServiceProvider::class,
+    Modules\User\UserServiceProvider::class,
+];
