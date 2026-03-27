@@ -31,6 +31,10 @@ Route::middleware(['web', 'auth'])->group(function () {
 
         return view('auth::livewire.dashboard');
     })->name('dashboard');
+
+    Route::get('/profile',
+        \Modules\Auth\Http\Livewire\Profile::class
+    )->name('profile');
 });
 
 Route::post('/logout', function () {

@@ -67,6 +67,9 @@
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ auth()->user()->name }}</p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ auth()->user()->email }}</p>
                                         </div>
+                                        <a href="{{ route('profile') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                            {{ __('Profile') }}
+                                        </a>
                                         @if(auth()->user()->hasRole(['Admin', 'Super Admin']))
                                             <a href="/admin" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                                 {{ __('Admin Dashboard') }}
