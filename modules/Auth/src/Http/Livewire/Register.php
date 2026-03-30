@@ -35,8 +35,7 @@ class Register extends Component
         Auth::login($user);
 
         session()->regenerate();
-
-        return redirect('/admin');
+        return redirect('/dashboard');
     }
 
     public function render()
