@@ -20,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
         Livewire::component('auth.login', \Modules\Auth\Http\Livewire\Login::class);
         Livewire::component('auth.register', \Modules\Auth\Http\Livewire\Register::class);
         Livewire::component('auth.forgot-password', \Modules\Auth\Http\Livewire\ForgotPassword::class);
+        Livewire::component('auth.reset-password', \Modules\Auth\Http\Livewire\ResetPassword::class);
         Livewire::component('auth.dashboard', \Modules\Auth\Http\Livewire\Dashboard::class);
         Livewire::component('auth.profile', \Modules\Auth\Http\Livewire\Profile::class);
     }

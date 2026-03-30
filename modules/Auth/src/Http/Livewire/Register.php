@@ -17,9 +17,13 @@ class Register extends Component
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public string $status = '';
+    public bool $submitting = false;
 
     public function register()
     {
+        $this->submitting = true;
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -32,10 +36,14 @@ class Register extends Component
             'password' => Hash::make($this->password),
         ]);
 
-        Auth::login($user);
+        $user->sendEmailVerificationNotification();
 
-        session()->regenerate();
-        return redirect('/dashboard');
+        $this->status = 'Registration successful! Verification email sent to ' . $this->email;
+
+        // logout first to allow redirect to login for unverified user path
+        Auth::logout();
+
+        return redirect()->route('login')->with('status', 'Registration successful! Please check your email and verify within 5 minutes.');
     }
 
     public function render()

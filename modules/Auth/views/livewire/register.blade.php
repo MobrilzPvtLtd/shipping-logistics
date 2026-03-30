@@ -12,7 +12,13 @@
             </p>
         </div>
 
-        <form wire:submit="register" class="mt-8 space-y-6">
+        @if($status)
+            <div class="rounded-md bg-green-50 dark:bg-green-900/20 p-4 mb-4">
+                <p class="text-sm text-green-800 dark:text-green-200">{{ $status }}</p>
+            </div>
+        @endif
+
+        <form wire:submit.prevent="register" class="mt-8 space-y-6">
             <div class="rounded-md shadow-sm space-y-4">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Name') }}</label>
@@ -43,9 +49,9 @@
             </div>
 
             <div>
-                <button type="submit" 
-                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    {{ __('Register') }}
+                <button type="submit" wire:loading.attr="disabled" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                    <span wire:loading.remove>{{ __('Register') }}</span>
+                    <span wire:loading>{{ __('Registering...') }}</span>
                 </button>
             </div>
         </form>
