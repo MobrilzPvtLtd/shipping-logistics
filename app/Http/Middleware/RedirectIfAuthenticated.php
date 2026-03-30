@@ -22,19 +22,7 @@ class RedirectIfAuthenticated
             if (Auth::guard($guard)->check()) {
                 $user = Auth::guard($guard)->user();
 
-                // Redirect based on user role
-                if ($user->hasRole('Super Admin')) {
-                    return redirect('/super-admin');
-                }
-
-                if ($user->hasRole('Warehouse Staff')) {
-                    return redirect('/warehouse');
-                }
-
-                if ($user->hasRole('Admin')) {
-                    return redirect('/admin');
-                }
-
+                // Redirect all authenticated users to shared dashboard
                 return redirect('/dashboard');
             }
         }

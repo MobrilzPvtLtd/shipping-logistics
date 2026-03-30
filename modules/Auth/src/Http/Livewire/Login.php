@@ -35,22 +35,7 @@ class Login extends Component
                 'hasAdminRole' => $user->hasRole(['Admin', 'Editor']),
             ]);
 
-            // Redirect based on role and panel association
-            if ($user->hasRole('Super Admin')) {
-                Log::info('Redirecting to /super-admin');
-                return redirect('/super-admin');
-            }
-
-            if ($user->hasRole('Warehouse Staff')) {
-                Log::info('Redirecting to /warehouse');
-                return redirect('/warehouse');
-            }
-
-            if ($user->hasRole(['Admin', 'Editor'])) {
-                Log::info('Redirecting to /admin');
-                return redirect('/admin');
-            }
-
+            // Redirect all authenticated users to shared dashboard
             Log::info('Redirecting to /dashboard');
             return redirect('/dashboard');
         }
