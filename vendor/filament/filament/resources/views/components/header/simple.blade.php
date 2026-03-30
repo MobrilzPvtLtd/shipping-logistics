@@ -6,7 +6,9 @@
 
 <header class="fi-simple-header">
     @if ($logo)
-        <x-filament-panels::logo />
+        <a href="{{ route('home') }}" aria-label="{{ __('Home') }}">
+            <x-filament-panels::logo />
+        </a>
     @endif
 
     @if (filled($heading))

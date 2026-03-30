@@ -17,6 +17,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Storage;
+use Modules\Settings\Models\Setting;
 
 class SuperAdminPanelProvider extends PanelProvider
 {
@@ -28,7 +30,7 @@ class SuperAdminPanelProvider extends PanelProvider
             ->login()
             ->authGuard('web')
             ->brandName('LaraCoreKit - Super Admin')
-            ->brandLogo(asset('images/logo.jpeg'))
+            ->brandLogo($this->resolveBrandLogo())
             ->darkMode(true)
             ->colors([
                 'primary' => Color::Indigo,
@@ -65,5 +67,24 @@ class SuperAdminPanelProvider extends PanelProvider
                 Authenticate::class,
                 \App\Http\Middleware\EnsureFilamentPanelRole::class,
             ]);
+    }
+
+    private function resolveBrandLogo(): string
+    {
+        $logo = Setting::get('site_logo');
+
+        if (!empty($logo)) {
+            if (filter_var($logo, FILTER_VALIDATE_URL)) {
+                return $logo;
+            }
+
+            if (Storage::disk('public')->exists($logo)) {
+                return asset("storage/{$logo}");
+            }
+
+            return asset($logo);
+        }
+
+        return asset('images/logo.jpeg');
     }
 }

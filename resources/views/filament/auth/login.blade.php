@@ -10,7 +10,7 @@
             <!-- Logo Section -->
             <div class="flex flex-col items-center mb-8">
                 @if ($logo = filament()->getBrandLogo())
-                    <a href="/" class="mb-4">
+                    <a href="{{ route('home') }}" class="mb-4">
                         <div class="mb-4">
                             <img src="{{ $logo }}" alt="LaraCoreKit" class="h-16 w-auto">
                         </div>
