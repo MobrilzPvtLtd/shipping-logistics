@@ -72,6 +72,12 @@ Route::middleware(['web'])->group(function () {
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard')->middleware('verified');
     Route::get('/profile', \Modules\Auth\Http\Livewire\Profile::class)->name('profile');
+
+    Route::get('/shipments', [\App\Http\Controllers\ShipmentController::class, 'index'])->name('shipments.index');
+    Route::get('/shipments/create', [\App\Http\Controllers\ShipmentController::class, 'create'])->name('shipments.create');
+    Route::post('/shipments', [\App\Http\Controllers\ShipmentController::class, 'store'])->name('shipments.store');
+    Route::get('/shipments/{shipment}/edit', [\App\Http\Controllers\ShipmentController::class, 'edit'])->name('shipments.edit');
+    Route::put('/shipments/{shipment}', [\App\Http\Controllers\ShipmentController::class, 'update'])->name('shipments.update');
 });
 
 Route::post('/logout', function () {

@@ -40,6 +40,15 @@
                         <span>{{ __('Warehouse') }}</span>
                     </a>
 
+                    @auth
+                        <a href="{{ route('shipments.create') }}" class="inline-flex items-center px-8 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span>{{ __('Create Shipment') }}</span>
+                        </a>
+                    @endauth
+
                 </div>
             </div>
         </div>

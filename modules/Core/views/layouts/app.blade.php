@@ -21,19 +21,23 @@
             <nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
-                        <div class="flex items-center">
+                        <div class="flex items-center space-x-6">
                             <!-- Logo -->
                             <a href="/" class="flex items-center">
                                 <img src="{{ asset('images/logo.jpeg') }}" alt="LaraCoreKit" class="h-6">
                             </a>
-
-                            <div class="hidden sm:ml-10 sm:flex sm:space-x-8">
+                            <div class="hidden sm:flex sm:space-x-8">
                                 <a href="/" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition">
                                     {{ __('Home') }}
                                 </a>
                                 <a href="/blog" wire:navigate class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition">
                                     {{ __('Blog') }}
                                 </a>
+                                @auth
+                                    <a href="{{ route('shipments.index') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition">
+                                        {{ __('Shipments') }}
+                                    </a>
+                                @endauth
                             </div>
                         </div>
 
@@ -110,7 +114,9 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
+                @yield('content')
+                {{-- support component slot usage too --}}
+                {{ isset($slot) ? $slot : '' }}
             </main>
 
             <!-- Footer -->
