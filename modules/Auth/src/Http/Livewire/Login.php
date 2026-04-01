@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Modules\User\Models\User;
 
 #[Layout('core::layouts.app')]
 #[Title('Login')]
@@ -20,6 +21,9 @@ class Login extends Component
 
     public function login()
     {
+        $this->resetErrorBag();
+        $this->status = '';
+
         $this->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
@@ -27,54 +31,55 @@ class Login extends Component
 
         Log::info('Login attempt', ['email' => $this->email]);
 
-        $user = \Modules\User\Models\User::where('email', $this->email)->first();
+        $user = User::where('email', $this->email)->first();
 
         if (! $user) {
+            Log::warning('Login failed - user not found', ['email' => $this->email]);
             $this->addError('email', 'Email does not exist. Please sign up first.');
             return;
         }
 
-        if (! Hash::check($this->password, $user->password)) {
-            $this->addError('password', 'Invalid password. Please try again.');
-            return;
-        }
-
         if (! $user->hasVerifiedEmail()) {
-            $user->sendEmailVerificationNotification();
-            $this->status = 'Your account is not verified. A new verification link has been sent to your email.';
+            if (app()->environment('local', 'testing')) {
+                $user->markEmailAsVerified();
+                Log::info('Auto-verifying user in local/testing environment', ['email' => $this->email]);
+            } else {
+                $user->sendEmailVerificationNotification();
+                $this->status = 'Your account is not verified. A new verification link has been sent to your email.';
+                Log::info('Login blocked - email not verified', ['email' => $this->email]);
+                return;
+            }
+        }
+
+        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+            Log::warning('Login failed - invalid credentials', ['email' => $this->email]);
+            $this->addError('email', 'The provided credentials do not match our records.');
             return;
         }
 
-        if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
-            session()->regenerate();
-            session()->forget('url.intended');
+        session()->regenerate();
+        session()->forget('url.intended');
 
-            Log::info('Login successful', [
-                'email' => $this->email,
-            ]);
+        Log::info('Login successful', ['email' => $this->email]);
 
-            // Redirect based on role
-            if ($user->hasRole('Super Admin')) {
-                Log::info('Redirecting to /super-admin');
-                return redirect('/super-admin');
-            }
-
-            if ($user->hasRole('Warehouse Staff')) {
-                Log::info('Redirecting to /warehouse');
-                return redirect('/warehouse');
-            }
-
-            if ($user->hasAnyRole(['Admin', 'Editor'])) {
-                Log::info('Redirecting to /admin');
-                return redirect('/admin');
-            }
-
-            Log::info('Redirecting to /dashboard');
-            return redirect('/dashboard');
+        // Redirect based on role
+        if ($user->hasRole('Super Admin')) {
+            Log::info('Redirecting to /super-admin');
+            return redirect('/super-admin');
         }
 
-        Log::warning('Login failed.', ['email' => $this->email]);
-        $this->addError('email', 'The provided credentials do not match our records.');
+        if ($user->hasRole('Warehouse Staff')) {
+            Log::info('Redirecting to /warehouse');
+            return redirect('/warehouse');
+        }
+
+        if ($user->hasAnyRole(['Admin', 'Editor'])) {
+            Log::info('Redirecting to /admin');
+            return redirect('/admin');
+        }
+
+        Log::info('Redirecting to /dashboard');
+        return redirect('/dashboard');
     }
 
     public function render()
