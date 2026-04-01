@@ -70,9 +70,17 @@
                                         <a href="{{ route('profile') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                             {{ __('Profile') }}
                                         </a>
-                                        @if(auth()->user()->hasRole(['Admin', 'Super Admin']))
+                                        @if(auth()->user()->hasRole(['Admin']))
                                             <a href="/admin" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                                                 {{ __('Admin Dashboard') }}
+                                            </a>
+                                        @elseif(auth()->user()->hasRole(['Warehouse Staff']))
+                                            <a href="/warehouse" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                {{ __('Warehouse Dashboard') }}
+                                            </a>
+                                        @elseif(auth()->user()->hasRole(['Super Admin']))
+                                            <a href="/super-admin" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                {{ __('Super Admin Dashboard') }}
                                             </a>
                                         @else
                                             <a href="/dashboard" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
