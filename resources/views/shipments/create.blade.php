@@ -158,6 +158,13 @@
                 class="text-red-600 dark:text-red-400 font-semibold">{{ __('All the data elements with a red asterisk are required') }}</span>
         </div>
 
+        @if(!empty($shipment) && $shipment->id)
+            <div class="flex justify-center gap-2 mb-4">
+                <a href="{{ route('shipments.invoices.index', $shipment) }}" class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">{{ __('Invoice list') }}</a>
+                <a href="{{ route('shipments.invoices.create', $shipment) }}" class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">{{ __('Create invoice') }}</a>
+            </div>
+        @endif
+
         <!-- Progress Bar -->
         <div class="mb-8">
             <div class="flex items-center gap-3">

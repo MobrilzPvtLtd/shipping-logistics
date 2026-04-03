@@ -57,6 +57,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     /**
      * Determine if user can access a Filament panel by panel id.
      */
+    protected static function newFactory()
+    {
+        return \Modules\User\Database\Factories\UserFactory::new();
+    }
+
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
         $panelId = $panel->getId();

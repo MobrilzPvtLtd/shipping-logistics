@@ -44,7 +44,9 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200">{{ ucfirst(str_replace('_', ' ', $shipment->status)) }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $shipment->created_at->format('Y-m-d') }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm flex gap-3">
+                            <a href="{{ route('shipments.invoices.index', $shipment) }}" class="text-indigo-600 hover:text-indigo-900">{{ __('Invoices') }}</a>
+                            <a href="{{ route('shipments.invoices.create', $shipment) }}" class="text-green-600 hover:text-green-900">{{ __('Add Invoice') }}</a>
                             <a href="{{ route('shipments.edit', $shipment) }}" class="text-blue-600 hover:text-blue-900">{{ __('Edit') }}</a>
                         </td>
                     </tr>

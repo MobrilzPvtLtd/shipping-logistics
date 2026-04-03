@@ -117,7 +117,7 @@ class ShipmentController extends Controller
         }
 
         if (empty($data['tracking_number'])) {
-            $data['tracking_number'] = 'SHIP-' . Str::upper(Str::random(8));
+            $data['tracking_number'] = 'SHIP'. '-' . Shipment::generateTrackingNumber(Auth::user());
         }
 
         Shipment::create($data);
