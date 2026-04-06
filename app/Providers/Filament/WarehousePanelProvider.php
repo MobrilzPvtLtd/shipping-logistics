@@ -39,6 +39,7 @@ class WarehousePanelProvider extends PanelProvider
             ->font('Inter')
             ->resources([
                 \Modules\Blog\Filament\Resources\BlogResource::class,
+                \App\Filament\Resources\ShipmentResource::class,
             ])
             ->pages([
                 \App\Filament\Pages\Dashboard::class,

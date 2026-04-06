@@ -35,6 +35,10 @@ class RolePermissionSeeder extends Seeder
             'view-media',
             'upload-media',
             'delete-media',
+            'view-shipments',
+            'create-shipments',
+            'edit-shipments',
+            'delete-shipments',
         ];
 
         foreach ($permissions as $permission) {
@@ -58,6 +62,10 @@ class RolePermissionSeeder extends Seeder
             'publish-blog',
             'view-settings',
             'edit-settings',
+            'view-shipments',
+            'create-shipments',
+            'edit-shipments',
+            'delete-shipments',
         ]);
 
         $warehouseRole = Role::firstOrCreate(['name' => 'Warehouse Staff']);
@@ -65,10 +73,13 @@ class RolePermissionSeeder extends Seeder
             'view-blog',
             'view-media',
             'upload-media',
+            'view-shipments',
+            'create-shipments',
+            'edit-shipments',
         ]);
 
         $userRole = Role::firstOrCreate(['name' => 'User']);
-        $userRole->syncPermissions(['view-blog']);
+        $userRole->syncPermissions(['view-blog', 'view-shipments', 'create-shipments', 'edit-shipments', 'delete-shipments']);
 
         // Assign Admin role to existing admin user
         $admin = User::where('email', 'admin@laracorekit.com')->first();

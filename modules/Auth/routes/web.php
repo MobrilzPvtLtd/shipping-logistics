@@ -78,6 +78,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/shipments', [\App\Http\Controllers\ShipmentController::class, 'store'])->name('shipments.store');
     Route::get('/shipments/{shipment}/edit', [\App\Http\Controllers\ShipmentController::class, 'edit'])->name('shipments.edit');
     Route::put('/shipments/{shipment}', [\App\Http\Controllers\ShipmentController::class, 'update'])->name('shipments.update');
+    Route::delete('/shipments/{shipment}', [\App\Http\Controllers\ShipmentController::class, 'destroy'])->name('shipments.destroy');
 
     Route::get('/shipments/{shipment}/invoices', [\App\Http\Controllers\InvoiceController::class, 'index'])->name('shipments.invoices.index');
     Route::get('/shipments/{shipment}/invoices/create', [\App\Http\Controllers\InvoiceController::class, 'create'])->name('shipments.invoices.create');

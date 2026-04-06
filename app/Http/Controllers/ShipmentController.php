@@ -11,20 +11,41 @@ use Illuminate\View\View;
 
 class ShipmentController extends Controller
 {
+    protected function canManageShipment(Shipment $shipment): bool
+    {
+        if (Auth::user()->hasRole('Warehouse Staff')) {
+            return $shipment->status === 'pending';
+        }
+
+        return $shipment->user_id === Auth::id() && $shipment->status === 'pending';
+    }
+
     public function index(): View
     {
-        $shipments = Shipment::where('user_id', Auth::id())->latest()->paginate(10);
+        abort_unless(Auth::user()->can('view-shipments'), 403);
+
+        $user = Auth::user();
+
+        if ($user->hasRole('Warehouse Staff')) {
+            $shipments = Shipment::where('status', 'pending')->latest()->paginate(10);
+        } else {
+            $shipments = Shipment::where('user_id', Auth::id())->latest()->paginate(10);
+        }
 
         return view('shipments.index', compact('shipments'));
     }
 
     public function create(): View
     {
+        abort_unless(Auth::user()->can('create-shipments'), 403);
+
         return view('shipments.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        abort_unless(Auth::user()->can('create-shipments'), 403);
+
         $data = $request->validate([
             'tracking_number' => 'nullable|string|unique:shipments,tracking_number',
             'sender_name' => 'nullable|string|max:255',
@@ -127,7 +148,7 @@ class ShipmentController extends Controller
 
     public function edit(Shipment $shipment): View
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless($this->canManageShipment($shipment), 403);
 
         // Reuse create UI for edit with prefill
         return view('shipments.create', compact('shipment'));
@@ -135,7 +156,8 @@ class ShipmentController extends Controller
 
     public function update(Request $request, Shipment $shipment): RedirectResponse
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless(Auth::user()->can('edit-shipments'), 403);
+        abort_unless($this->canManageShipment($shipment), 403);
 
         $data = $request->validate([
             'tracking_number' => 'nullable|string|unique:shipments,tracking_number,' . $shipment->id,
@@ -229,5 +251,15 @@ class ShipmentController extends Controller
         $shipment->update($data);
 
         return redirect()->route('shipments.index')->with('success', __('Shipment updated successfully.'));
+    }
+
+    public function destroy(Shipment $shipment): RedirectResponse
+    {
+        abort_unless(Auth::user()->can('delete-shipments'), 403);
+        abort_unless($this->canManageShipment($shipment), 403);
+
+        $shipment->delete();
+
+        return redirect()->route('shipments.index')->with('success', __('Shipment deleted successfully.'));
     }
 }

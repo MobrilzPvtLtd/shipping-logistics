@@ -42,6 +42,7 @@ class SuperAdminPanelProvider extends PanelProvider
                 \Modules\User\Filament\Resources\UserResource::class,
                 \Modules\User\Filament\Resources\Roles\RoleResource::class,
                 \Modules\User\Filament\Resources\Permissions\PermissionResource::class,
+                \App\Filament\Resources\ShipmentResource::class,
             ])
             ->pages([
                 \App\Filament\Pages\Dashboard::class,
