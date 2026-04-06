@@ -41,6 +41,18 @@ return new class extends Migration
             $table->decimal('line_total', 15, 2)->nullable();
             $table->string('file_path')->nullable();
             $table->string('file_type')->nullable();
+            $table->string('exporter_city_zip')->nullable();
+            $table->string('exporter_country')->nullable();
+            $table->string('exporter_phone')->nullable();
+            $table->string('consignee_city_zip')->nullable();
+            $table->string('consignee_country')->nullable();
+            $table->string('consignee_phone')->nullable();
+            $table->string('consignee_contact')->nullable();
+            $table->string('consignee_tax_id')->nullable();
+            $table->string('other_info')->nullable();
+            $table->string('signer_name')->nullable();
+            $table->date('signature_date')->nullable();
+            $table->text('signature_data')->nullable();
             $table->timestamps();
         });
     }

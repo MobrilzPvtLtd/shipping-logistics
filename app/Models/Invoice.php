@@ -47,12 +47,14 @@ class Invoice extends Model
         'line_total',
         'signer_name',
         'signature_date',
+        'signature_data',
         'file_path',
         'file_type',
     ];
 
     protected $casts = [
         'invoice_date' => 'date',
+        'signature_date' => 'date',
     ];
 
     public function shipment()

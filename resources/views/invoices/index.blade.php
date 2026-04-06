@@ -38,6 +38,7 @@
                         <td class="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">{{ $invoice->total_invoice_value ?? '-' }}</td>
                         <td class="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">{{ basename($invoice->file_path ?? '') }}</td>
                         <td class="px-4 py-3 text-sm text-gray-800 dark:text-gray-200 flex gap-2">
+                            <a href="{{ route('shipments.invoices.edit', [$shipment, $invoice]) }}" class="text-indigo-600">{{ __('Edit') }}</a>
                             @if($invoice->file_path)
                                 <a href="{{ route('shipments.invoices.download', [$shipment, $invoice]) }}" class="text-blue-600">{{ __('Download') }}</a>
                             @endif

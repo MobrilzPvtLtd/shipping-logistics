@@ -1,239 +1,465 @@
 @extends('core::layouts.app')
 
 @section('content')
-<div class="max-w-5xl mx-auto py-10 px-4">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold">{{ __('Generate Commercial Invoice') }} - {{ $shipment->tracking_number }}</h1>
-        <a href="{{ route('shipments.invoices.index', $shipment) }}" class="text-blue-600 hover:underline">{{ __('Back to invoices') }}</a>
+    <div class="max-w-5xl mx-auto py-10 px-4 font-sans text-gray-900">
+        <!-- Header Navigation -->
+        <div class="flex items-center justify-between mb-4 print:hidden">
+            <h1 class="text-xl font-bold uppercase tracking-tight text-gray-700">{{ __('Generate Commercial Invoice') }}</h1>
+            <a href="{{ route('shipments.invoices.index', $shipment) }}"
+                class="text-blue-600 hover:underline text-sm font-medium">← {{ __('Back') }}</a>
+        </div>
+
+        @php
+            $isEdit = isset($invoice);
+            $invoice = $invoice ?? null;
+            $oldValue = function ($name, $default = '') use ($invoice) {
+                return old($name, data_get($invoice, $name, $default));
+            };
+        @endphp
+        <!-- Main Invoice Form -->
+        <form method="POST" action="{{ $isEdit ? route('shipments.invoices.update', [$shipment, $invoice]) : route('shipments.invoices.store', $shipment) }}" enctype="multipart/form-data"
+            class="bg-white border-[1.5px] border-black text-[11px] leading-tight">
+            @csrf
+            @if($isEdit)
+                @method('PUT')
+            @endif
+
+            @if ($errors->any())
+                <div class="p-4 border border-red-200 bg-red-50 text-red-700 mb-4">
+                    <ul class="list-disc pl-5 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <!-- 1. TOP HEADER -->
+            <div class="bg-[#f1eeea] p-2 border-b border-black text-center font-bold text-lg uppercase tracking-widest">
+                {{ $isEdit ? __('Edit Commercial Invoice') : __('Commercial Invoice') }}
+            </div>
+
+            <!-- 2. DATE & INVOICE NO -->
+            <div class="grid grid-cols-2 border-b border-black">
+                <div class="p-2 border-r border-black h-14">
+                    <label class="block text-[10px] font-semibold text-gray-600 uppercase">{{ __('Date') }}</label>
+                    <input type="date" name="invoice_date"
+                        value="{{ old('invoice_date', optional($invoice)->invoice_date?->format('Y-m-d') ?? date('Y-m-d')) }}"
+                        class="w-full border-none p-0 focus:ring-0 text-sm" />
+                </div>
+                <div class="p-2 h-14">
+                    <label class="block text-[10px] font-semibold text-gray-600 uppercase">{{ __('Invoice No.') }}</label>
+                    <input type="text" name="invoice_number"
+                        value="{{ old('invoice_number', $invoice->invoice_number ?? '') }}"
+                        placeholder="Enter number..."
+                        class="w-full border-none p-0 focus:ring-0 text-sm" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 border-b border-black">
+                <div class="p-2 h-20">
+                    <label class="block text-[10px] font-semibold text-gray-600 uppercase">{{ __('Invoice Document') }}</label>
+                    <input type="file" name="invoice_file" accept=".pdf,.jpg,.jpeg,.png,.tiff"
+                        class="w-full border-none p-0 focus:ring-0 text-sm" />
+                    @if($isEdit && $invoice->file_path)
+                        <p class="mt-1 text-xs text-gray-500">{{ __('Current file:') }} <a href="{{ route('shipments.invoices.download', [$shipment, $invoice]) }}" class="underline">{{ basename($invoice->file_path) }}</a></p>
+                    @endif
+                </div>
+            </div>
+
+            <!-- 3. EXPORTER & CONSIGNEE (Vertical labels inside boxes) -->
+            <div class="grid grid-cols-2 border-b border-black">
+                <!-- Exporter -->
+                <div class="p-3 border-r border-black space-y-2">
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Exporter') }}</label><input
+                            name="exporter_name" value="{{ old('exporter_name', $invoice->exporter_name ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0 font-bold" /></div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Address') }}</label>
+                        <textarea name="exporter_address" rows="2" class="w-full border-none p-0 focus:ring-0 resize-none">{{ old('exporter_address', $invoice->exporter_address ?? '') }}</textarea>
+                    </div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('City/State/Zip') }}</label><input
+                            name="exporter_city_zip" value="{{ old('exporter_city_zip', $invoice->exporter_city_zip ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Country') }}</label><input
+                            name="exporter_country" value="{{ old('exporter_country', $invoice->exporter_country ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Phone/Fax') }}</label><input
+                            name="exporter_phone" value="{{ old('exporter_phone', $invoice->exporter_phone ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Contact Person') }}</label><input
+                            name="contact_person" value="{{ old('contact_person', $invoice->contact_person ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                </div>
+                <!-- Consignee -->
+                <div class="p-3 space-y-2">
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Consignee') }}</label><input
+                            name="consignee_name" value="{{ old('consignee_name', $invoice->consignee_name ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0 font-bold" /></div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Address') }}</label>
+                        <textarea name="consignee_address" rows="2" class="w-full border-none p-0 focus:ring-0 resize-none">{{ old('consignee_address', $invoice->consignee_address ?? '') }}</textarea>
+                    </div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('City/State/Zip') }}</label><input
+                            name="consignee_city_zip" value="{{ old('consignee_city_zip', $invoice->consignee_city_zip ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Country') }}</label><input
+                            name="consignee_country" value="{{ old('consignee_country', $invoice->consignee_country ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Phone/Fax') }}</label><input
+                            name="consignee_phone" value="{{ old('consignee_phone', $invoice->consignee_phone ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div><label class="block text-gray-500 uppercase text-[9px]">{{ __('Contact Person') }}</label><input
+                            name="consignee_contact" value="{{ old('consignee_contact', $invoice->consignee_contact ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                </div>
+            </div>
+
+            <!-- 4. LOGISTICS GRID (Exact Grid Layout from Image) -->
+            <div class="grid grid-cols-12 border-b border-black h-36">
+                <!-- Left 8 Columns (4x2 grid) -->
+                <div class="col-span-8 grid grid-cols-4 grid-rows-2 border-r border-black h-full">
+                    <div class="border-r border-b border-black p-1"><label
+                            class="block text-[8px] font-bold uppercase">{{ __('Tax ID No (EIN)') }}</label><input
+                            name="reference_tax_id" value="{{ old('reference_tax_id', $invoice->reference_tax_id ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div class="border-r border-b border-black p-1"><label
+                            class="block text-[8px] font-bold uppercase">{{ __('Total Gross Weight') }}</label><input
+                            name="total_gross_weight" value="{{ old('total_gross_weight', $invoice->total_gross_weight ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div class="border-r border-b border-black p-1"><label
+                            class="block text-[8px] font-bold uppercase">{{ __('Transportation') }}</label><input
+                            name="transportation" value="{{ old('transportation', $invoice->transportation ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div class="border-b border-black p-1"><label
+                            class="block text-[8px] font-bold uppercase">{{ __('Consignee Tax ID No (EIN)') }}</label><input
+                            name="consignee_tax_id" value="{{ old('consignee_tax_id', $invoice->consignee_tax_id ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+
+                    <div class="border-r border-black p-1"><label
+                            class="block text-[8px] font-bold uppercase">{{ __('Other') }}</label><input
+                            name="other_info" value="{{ old('other_info', $invoice->other_info ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div class="border-r border-black p-1"><label
+                            class="block text-[8px] font-bold uppercase">{{ __('Total # of Pieces') }}</label><input
+                            name="total_pieces" value="{{ old('total_pieces', $invoice->total_pieces ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div class="border-r border-black p-1"><label
+                            class="block text-[8px] font-bold uppercase">{{ __('AWB/BL#') }}</label><input
+                            name="awb_bl_number" value="{{ old('awb_bl_number', $invoice->awb_bl_number ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0" /></div>
+                    <div class="p-1"><label
+                            class="block text-[8px] font-bold uppercase">{{ __('Currency') }}</label><input name="currency"
+                            value="{{ old('currency', $invoice->currency ?? 'USD') }}" class="w-full border-none p-0 focus:ring-0" /></div>
+                </div>
+                <!-- Right 4 Columns (Terms of Sale) -->
+                <div class="col-span-4 p-2 h-full">
+                    <label class="block text-[9px] font-bold uppercase mb-1">{{ __('Terms of Sale') }}</label>
+                    <textarea name="terms_of_sale" class="w-full border-none p-0 focus:ring-0 resize-none h-24">{{ old('terms_of_sale', $invoice->terms_of_sale ?? '') }}</textarea>
+                </div>
+            </div>
+
+            <!-- 5 & 6: REDESIGNED COMMODITY ROW (Label at top, Input below) -->
+            <div class="grid grid-cols-12 border-b border-black divide-x divide-black bg-white min-h-[300px]">
+                <!-- Commodity Description -->
+                <div class="col-span-3 flex flex-col h-full">
+                    <div
+                        class="bg-[#f1eeea] p-2 border-b border-black text-[9px] font-bold uppercase text-gray-700 h-10 flex items-center justify-center text-center">
+                        {{ __('Commodity Description') }}
+                    </div>
+                    <div class="p-2 grow flex">
+                        <textarea name="commodity_description"
+                            class="w-full h-full border-none p-0 focus:ring-0 resize-none text-[11px] leading-tight bg-transparent">{{ old('commodity_description', $invoice->commodity_description ?? '') }}</textarea>
+                    </div>
+                </div>
+
+                <!-- HS -->
+                <div class="col-span-1 flex flex-col h-full">
+                    <div
+                        class="bg-[#f1eeea] p-2 border-b border-black text-[9px] font-bold uppercase text-gray-700 h-10 flex items-center justify-center text-center">
+                        {{ __('HS') }}
+                    </div>
+                    <div class="p-2 grow flex items-start">
+                        <input name="hs_code"
+                            value="{{ old('hs_code', $invoice->hs_code ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0 text-center text-[11px] bg-transparent" />
+                    </div>
+                </div>
+
+                <!-- Country of Manufacture -->
+                <div class="col-span-2 flex flex-col h-full">
+                    <div
+                        class="bg-[#f1eeea] p-2 border-b border-black text-[8px] font-bold uppercase text-gray-700 h-10 flex items-center justify-center text-center leading-none">
+                        {{ __('Country of Manufacture') }}
+                    </div>
+                    <div class="p-2 grow flex items-start">
+                        <input name="country_of_manufacture"
+                            value="{{ old('country_of_manufacture', $invoice->country_of_manufacture ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0 text-center text-[11px] bg-transparent" />
+                    </div>
+                </div>
+
+                <!-- QTY -->
+                <div class="col-span-1 flex flex-col h-full">
+                    <div
+                        class="bg-[#f1eeea] p-2 border-b border-black text-[9px] font-bold uppercase text-gray-700 h-10 flex items-center justify-center text-center">
+                        {{ __('QTY') }}
+                    </div>
+                    <div class="p-2 grow flex items-start">
+                        <input name="quantity"
+                            value="{{ old('quantity', $invoice->quantity ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0 text-center text-[11px] bg-transparent" />
+                    </div>
+                </div>
+
+                <!-- UOM -->
+                <div class="col-span-1 flex flex-col h-full">
+                    <div
+                        class="bg-[#f1eeea] p-2 border-b border-black text-[9px] font-bold uppercase text-gray-700 h-10 flex items-center justify-center text-center">
+                        {{ __('UOM') }}
+                    </div>
+                    <div class="p-2 grow flex items-start">
+                        <input name="uom"
+                            value="{{ old('uom', $invoice->uom ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0 text-center text-[11px] bg-transparent" />
+                    </div>
+                </div>
+
+                <!-- Unit Price -->
+                <div class="col-span-2 flex flex-col h-full">
+                    <div
+                        class="bg-[#f1eeea] p-2 border-b border-black text-[9px] font-bold uppercase text-gray-700 h-10 flex items-center justify-center text-center">
+                        {{ __('Unit Price') }}
+                    </div>
+                    <div class="p-2 grow flex items-start">
+                        <input name="unit_price"
+                            value="{{ old('unit_price', $invoice->unit_price ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0 text-right px-2 text-[11px] bg-transparent" />
+                    </div>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="col-span-2 flex flex-col h-full">
+                    <div
+                        class="bg-[#f1eeea] p-2 border-b border-black text-[9px] font-bold uppercase text-gray-700 h-10 flex items-center justify-center text-center">
+                        {{ __('Total Amount') }}
+                    </div>
+                    <div class="p-2 grow flex items-start">
+                        <input name="line_total"
+                            value="{{ old('line_total', $invoice->line_total ?? '') }}"
+                            class="w-full border-none p-0 focus:ring-0 text-right px-2 text-[11px] font-bold bg-transparent" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. FOOTER: LEGAL + TOTALS -->
+            <div class="grid grid-cols-12 h-44">
+                <!-- Legal Text -->
+                <div class="col-span-7 p-4 text-[9px] italic border-r border-black leading-tight text-gray-700">
+                    {{ __('These commodities, technologies, or software were exported from the United States in accordance with export administration regulations. Diversions contrary to United States law prohibited. We certify that this commercial invoice is true and correct.') }}
+                </div>
+                <!-- Totals Section -->
+                <div class="col-span-5 flex flex-col border-l border-black">
+                    <div class="grid grid-cols-3 border-b border-black h-1/4">
+                        <div
+                            class="col-span-2 bg-[#f1eeea] border-r border-black p-2 font-bold uppercase flex items-center">
+                            {{ __('Subtotal') }}</div>
+                        <div class="p-2 flex items-center"><input name="subtotal_amount"
+                                value="{{ old('subtotal_amount', $invoice->subtotal_amount ?? '') }}"
+                                class="w-full border-none p-0 focus:ring-0 text-right" /></div>
+                    </div>
+                    <div class="grid grid-cols-3 border-b border-black h-1/4">
+                        <div class="col-span-2 border-r border-black p-2 font-bold uppercase flex items-center">
+                            {{ __('Freight Cost') }}</div>
+                        <div class="p-2 flex items-center"><input name="freight_cost"
+                                value="{{ old('freight_cost', $invoice->freight_cost ?? '') }}"
+                                class="w-full border-none p-0 focus:ring-0 text-right" /></div>
+                    </div>
+                    <div class="grid grid-cols-3 border-b border-black h-1/4">
+                        <div
+                            class="col-span-2 bg-[#f1eeea] border-r border-black p-2 font-bold uppercase flex items-center">
+                            {{ __('Insurance Cost') }}</div>
+                        <div class="p-2 flex items-center"><input name="insurance_cost"
+                                value="{{ old('insurance_cost', $invoice->insurance_cost ?? '') }}"
+                                class="w-full border-none p-0 focus:ring-0 text-right" /></div>
+                    </div>
+                    <div class="grid grid-cols-3 h-1/4 bg-[#f1eeea]">
+                        <div
+                            class="col-span-2 border-r border-black p-2 font-black uppercase text-[12px] flex items-center">
+                            {{ __('Total Invoice Value') }}</div>
+                        <div class="p-2 flex items-center"><input name="total_invoice_value"
+                                value="{{ old('total_invoice_value', $invoice->total_invoice_value ?? '') }}"
+                                class="w-full border-none p-0 focus:ring-0 text-right font-black text-sm" /></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. BOTTOM CERTIFICATION -->
+            <div class="border-t border-black p-3">
+                <p class="mb-4 text-[10px] font-medium">
+                    {{ __('I/we hereby certify that the information on this invoice is true and correct and that the contents of this shipment are as stated above.') }}
+                </p>
+
+                <div class="grid grid-cols-3 border border-black h-44">
+                    <div class="border-r border-black p-2">
+                        <label class="block text-[8px] font-bold uppercase text-gray-500 mb-1">{{ __('Name') }}</label>
+                        <input name="signer_name" value="{{ old('signer_name', $invoice->signer_name ?? '') }}" class="w-full border-none p-0 focus:ring-0 text-[11px] font-bold" />
+                    </div>
+                    <div class="border-r border-black p-2 flex flex-col">
+                        <label class="block text-[8px] font-bold uppercase text-gray-500 mb-1">{{ __('Signature') }}</label>
+                        <canvas id="signatureCanvas" width="400" height="120" class="border border-gray-300 rounded-lg bg-white w-full"></canvas>
+                        <div class="mt-2 flex gap-2">
+                            <button type="button" id="clearSignature" class="px-3 py-1 bg-gray-200 rounded text-xs">{{ __('Clear') }}</button>
+                            <button type="button" id="saveSignature" class="px-3 py-1 bg-blue-600 text-white rounded text-xs">{{ __('Save') }}</button>
+                        </div>
+                        <input type="hidden" name="signature_data" id="signature_data" value="{{ old('signature_data', $invoice->signature_data ?? '') }}">
+                        <div id="signature_preview" class="mt-2"></div>
+                    </div>
+                    <div class="p-2">
+                        <label class="block text-[8px] font-bold uppercase text-gray-500 mb-1">{{ __('Date') }}</label>
+                        <input type="date" name="signature_date" value="{{ old('signature_date', optional($invoice)->signature_date?->format('Y-m-d') ?? '') }}" class="w-full border-none p-0 focus:ring-0 text-[11px]" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit UI (Hidden on Print) -->
+            <div class="bg-gray-100 p-4 border-t border-black flex justify-end print:hidden">
+                <button type="submit"
+                    class="bg-black text-white px-8 py-2 rounded-sm font-bold uppercase text-xs tracking-widest hover:bg-gray-900 transition-colors">
+                    {{ __('Finalize Invoice') }}
+                </button>
+            </div>
+        </form>
     </div>
 
-    <form method="POST" action="{{ route('shipments.invoices.store', $shipment) }}" enctype="multipart/form-data" class="bg-white shadow-lg border border-gray-400 text-xs">
-        @csrf
+    <style>
+        input,
+        textarea {
+            background: transparent !important;
+        }
 
-        <!-- Top Header -->
-        <div class="bg-stone-100 p-2 border-b border-gray-400 text-center font-bold text-lg uppercase tracking-wider">
-            {{ __('Commercial Invoice') }}
-        </div>
+        input:focus,
+        textarea:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
 
-        <!-- Date & Invoice No -->
-        <div class="grid grid-cols-2 border-b border-gray-400">
-            <div class="p-2 border-r border-gray-400">
-                <label class="block text-[10px] uppercase font-bold text-gray-600">{{ __('Date') }}</label>
-                <input type="date" name="invoice_date" value="{{ old('invoice_date', date('Y-m-d')) }}" class="w-full border-none p-0 focus:ring-0 text-sm" />
-            </div>
-            <div class="p-2">
-                <label class="block text-[10px] uppercase font-bold text-gray-600">{{ __('Invoice No.') }}</label>
-                <input type="text" name="invoice_number" value="{{ old('invoice_number') }}" class="w-full border-none p-0 focus:ring-0 text-sm" placeholder="e.g. INV-1001" />
-            </div>
-        </div>
+        @media print {
+            .print\:hidden {
+                display: none;
+            }
+        }
+    </style>
 
-        <!-- Exporter & Consignee Row -->
-        <div class="grid grid-cols-2 border-b border-gray-400">
-            <!-- Exporter -->
-            <div class="p-2 border-r border-gray-400 space-y-1">
-                <div>
-                    <label class="block text-[10px] uppercase font-bold text-gray-600">{{ __('Exporter') }}</label>
-                    <input name="exporter_name" value="{{ old('exporter_name') }}" class="w-full border-none p-0 focus:ring-0 font-semibold" />
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase">{{ __('Address') }}</label>
-                    <textarea name="exporter_address" rows="2" class="w-full border-none p-0 focus:ring-0 resize-none">{{ old('exporter_address') }}</textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase">{{ __('City/State/ZIP') }}</label>
-                        <input name="exporter_city_zip" class="w-full border-none p-0 focus:ring-0" />
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase">{{ __('Country') }}</label>
-                        <input name="exporter_country" class="w-full border-none p-0 focus:ring-0" />
-                    </div>
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase">{{ __('Phone/Fax') }}</label>
-                    <input name="exporter_phone" class="w-full border-none p-0 focus:ring-0" />
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase">{{ __('Contact Person') }}</label>
-                    <input name="contact_person" class="w-full border-none p-0 focus:ring-0" />
-                </div>
-            </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const canvas = document.getElementById('signatureCanvas');
+            if (!canvas) return;
 
-            <!-- Consignee -->
-            <div class="p-2 space-y-1">
-                <div>
-                    <label class="block text-[10px] uppercase font-bold text-gray-600">{{ __('Consignee') }}</label>
-                    <input name="consignee_name" value="{{ old('consignee_name') }}" class="w-full border-none p-0 focus:ring-0 font-semibold" />
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase">{{ __('Address') }}</label>
-                    <textarea name="consignee_address" rows="2" class="w-full border-none p-0 focus:ring-0 resize-none">{{ old('consignee_address') }}</textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase">{{ __('City/State/ZIP') }}</label>
-                        <input name="consignee_city_zip" class="w-full border-none p-0 focus:ring-0" />
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase">{{ __('Country') }}</label>
-                        <input name="consignee_country" class="w-full border-none p-0 focus:ring-0" />
-                    </div>
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase">{{ __('Phone/Fax') }}</label>
-                    <input name="consignee_phone" class="w-full border-none p-0 focus:ring-0" />
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase">{{ __('Contact Person') }}</label>
-                    <input name="consignee_contact" class="w-full border-none p-0 focus:ring-0" />
-                </div>
-            </div>
-        </div>
+            const ctx = canvas.getContext('2d');
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        <!-- Logistics Grid -->
-        <div class="grid grid-cols-12 border-b border-gray-400 h-32">
-            <div class="col-span-2 border-r border-b border-gray-400 p-1">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('Tax ID No (EIN)') }}</label>
-                <input name="reference_tax_id" class="w-full border-none p-0 focus:ring-0 mt-2" />
-            </div>
-            <div class="col-span-2 border-r border-b border-gray-400 p-1">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('Total Gross Weight') }}</label>
-                <input name="total_gross_weight" class="w-full border-none p-0 focus:ring-0 mt-2" />
-            </div>
-            <div class="col-span-2 border-r border-b border-gray-400 p-1">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('Transportation') }}</label>
-                <input name="transportation" class="w-full border-none p-0 focus:ring-0 mt-2" />
-            </div>
-            <div class="col-span-2 border-r border-b border-gray-400 p-1">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('Tax ID No (EIN)') }}</label>
-                <input name="consignee_tax_id" class="w-full border-none p-0 focus:ring-0 mt-2" />
-            </div>
-            <div class="col-span-4 border-b border-gray-400 p-1 row-span-2">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('Terms of Sale') }}</label>
-                <textarea name="terms_of_sale" class="w-full border-none p-0 focus:ring-0 resize-none h-20"></textarea>
-            </div>
+            let drawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let hasDrawn = false;
 
-            <!-- Second Row of Logistics -->
-            <div class="col-span-2 border-r border-gray-400 p-1">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('Other') }}</label>
-                <input name="other_info" class="w-full border-none p-0 focus:ring-0 mt-2" />
-            </div>
-            <div class="col-span-2 border-r border-gray-400 p-1">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('Total # of Pieces') }}</label>
-                <input name="total_pieces" class="w-full border-none p-0 focus:ring-0 mt-2" />
-            </div>
-            <div class="col-span-2 border-r border-gray-400 p-1">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('AWB/BL#') }}</label>
-                <input name="awb_bl_number" class="w-full border-none p-0 focus:ring-0 mt-2" />
-            </div>
-            <div class="col-span-2 border-r border-gray-400 p-1">
-                <label class="block text-[9px] uppercase font-bold leading-tight">{{ __('Currency') }}</label>
-                <input name="currency" value="USD" class="w-full border-none p-0 focus:ring-0 mt-2" />
-            </div>
-        </div>
+            function getPosition(event) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.touches ? event.touches[0].clientX - rect.left : event.clientX - rect.left;
+                const y = event.touches ? event.touches[0].clientY - rect.top : event.clientY - rect.top;
+                return { x, y };
+            }
 
-        <!-- Commodity Table Header -->
-        <div class="grid grid-cols-12 border-b border-gray-400 bg-gray-50 text-center font-bold text-[10px] uppercase">
-            <div class="col-span-3 border-r border-gray-400 p-1 py-2">{{ __('Commodity Description') }}</div>
-            <div class="col-span-1 border-r border-gray-400 p-1 py-2">{{ __('HS') }}</div>
-            <div class="col-span-2 border-r border-gray-400 p-1 py-2">{{ __('Country of Manufacture') }}</div>
-            <div class="col-span-1 border-r border-gray-400 p-1 py-2">{{ __('QTY') }}</div>
-            <div class="col-span-1 border-r border-gray-400 p-1 py-2">{{ __('UOM') }}</div>
-            <div class="col-span-2 border-r border-gray-400 p-1 py-2">{{ __('Unit Price') }}</div>
-            <div class="col-span-2 p-1 py-2">{{ __('Total Amount') }}</div>
-        </div>
+            function startDraw(event) {
+                event.preventDefault();
+                drawing = true;
+                const pos = getPosition(event);
+                lastX = pos.x;
+                lastY = pos.y;
+            }
 
-        <!-- Commodity Table Body -->
-        <div class="grid grid-cols-12 border-b border-gray-400 min-h-[300px]">
-            <div class="col-span-3 border-r border-gray-400 p-1">
-                <textarea name="commodity_description" class="w-full h-full border-none p-1 focus:ring-0 text-[11px] resize-none"></textarea>
-            </div>
-            <div class="col-span-1 border-r border-gray-400 p-1">
-                <input name="hs_code" class="w-full border-none p-1 focus:ring-0 text-center" />
-            </div>
-            <div class="col-span-2 border-r border-gray-400 p-1">
-                <input name="country_of_manufacture" class="w-full border-none p-1 focus:ring-0 text-center" />
-            </div>
-            <div class="col-span-1 border-r border-gray-400 p-1">
-                <input type="number" name="quantity" class="w-full border-none p-1 focus:ring-0 text-center" />
-            </div>
-            <div class="col-span-1 border-r border-gray-400 p-1">
-                <input name="uom" class="w-full border-none p-1 focus:ring-0 text-center" placeholder="PCS" />
-            </div>
-            <div class="col-span-2 border-r border-gray-400 p-1">
-                <input name="unit_price" class="w-full border-none p-1 focus:ring-0 text-right" />
-            </div>
-            <div class="col-span-2 p-1">
-                <input name="line_total" class="w-full border-none p-1 focus:ring-0 text-right font-semibold" />
-            </div>
-        </div>
+            function draw(event) {
+                if (!drawing) return;
+                event.preventDefault();
+                const pos = getPosition(event);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                lastX = pos.x;
+                lastY = pos.y;
+                hasDrawn = true;
+            }
 
-        <!-- Footer Section -->
-        <div class="grid grid-cols-12">
-            <!-- Left Legal Text -->
-            <div class="col-span-6 p-4 text-[9px] border-r border-gray-400 italic text-gray-600 leading-tight">
-                {{ __('These commodities, technologies, or software were exported from the United States in accordance with export administration regulations. Diversions contrary to United States law prohibited. We certify that this commercial invoice is true and correct.') }}
+            function stopDraw() {
+                drawing = false;
+            }
 
-                <div class="mt-6 border-t border-dashed pt-2">
-                    <label class="block text-[10px] uppercase font-bold not-italic">{{ __('Attachment / Digital Copy') }}</label>
-                    <input type="file" name="invoice_file" class="mt-2 text-[10px]" />
-                </div>
-            </div>
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseleave', stopDraw);
+            canvas.addEventListener('touchend', stopDraw);
+            canvas.addEventListener('touchcancel', stopDraw);
 
-            <!-- Right Totals -->
-            <div class="col-span-6">
-                <div class="grid grid-cols-3 border-b border-gray-400 bg-stone-50">
-                    <div class="col-span-2 border-r border-gray-400 p-2 font-bold uppercase">{{ __('Subtotal') }}</div>
-                    <div class="p-2 text-right"><input name="subtotal_amount" class="w-full border-none p-0 focus:ring-0 bg-transparent text-right" /></div>
-                </div>
-                <div class="grid grid-cols-3 border-b border-gray-400">
-                    <div class="col-span-2 border-r border-gray-400 p-2 font-bold uppercase">{{ __('Freight Cost') }}</div>
-                    <div class="p-2 text-right"><input name="freight_cost" class="w-full border-none p-0 focus:ring-0 text-right" /></div>
-                </div>
-                <div class="grid grid-cols-3 border-b border-gray-400 bg-stone-50">
-                    <div class="col-span-2 border-r border-gray-400 p-2 font-bold uppercase">{{ __('Insurance Cost') }}</div>
-                    <div class="p-2 text-right"><input name="insurance_cost" class="w-full border-none p-0 focus:ring-0 bg-transparent text-right" /></div>
-                </div>
-                <div class="grid grid-cols-3 bg-stone-100">
-                    <div class="col-span-2 border-r border-gray-400 p-2 font-black uppercase text-sm">{{ __('Total Invoice Value') }}</div>
-                    <div class="p-2 text-right"><input name="total_invoice_value" class="w-full border-none p-0 focus:ring-0 bg-transparent text-right font-bold text-sm" /></div>
-                </div>
-            </div>
-        </div>
+            const signatureInput = document.getElementById('signature_data');
+            const signaturePreview = document.getElementById('signature_preview');
+            const form = canvas.closest('form');
 
-        <!-- Certification & Signature -->
-        <div class="border-t border-gray-400 p-2 text-[10px]">
-            <p class="mb-4">{{ __('I/we hereby certify that the information on this invoice is true and correct and that the contents of this shipment are as stated above.') }}</p>
-            <div class="grid grid-cols-12 gap-0 border border-gray-400">
-                <div class="col-span-4 border-r border-gray-400 p-1 h-12">
-                    <label class="block uppercase font-bold text-[8px]">{{ __('Name') }}</label>
-                    <input name="signer_name" class="w-full border-none p-0 focus:ring-0" />
-                </div>
-                <div class="col-span-5 border-r border-gray-400 p-1 h-12">
-                    <label class="block uppercase font-bold text-[8px]">{{ __('Signature') }}</label>
-                    <div class="w-full h-6 border-b border-gray-200 border-dotted"></div>
-                </div>
-                <div class="col-span-3 p-1 h-12">
-                    <label class="block uppercase font-bold text-[8px]">{{ __('Date') }}</label>
-                    <input type="date" name="signature_date" class="w-full border-none p-0 focus:ring-0" />
-                </div>
-            </div>
-        </div>
+            function renderPreview(dataUrl) {
+                signaturePreview.innerHTML = dataUrl ? '<img src="' + dataUrl + '" class="h-20 border border-gray-300 rounded" />' : '';
+            }
 
-        <!-- Submission UI -->
-        <div class="bg-gray-100 p-4 flex justify-end gap-3 border-t border-gray-400">
-            <button type="submit" class="px-6 py-2 bg-blue-700 text-white font-bold rounded shadow hover:bg-blue-800 uppercase text-xs">
-                {{ __('Upload and Finalize Invoice') }}
-            </button>
-        </div>
-    </form>
-</div>
+            function loadSignatureOnCanvas(dataUrl) {
+                if (!dataUrl) {
+                    return;
+                }
 
-<style>
-    /* Ensure borders look crisp like a table */
-    input:focus, textarea:focus {
-        outline: none !important;
-        box-shadow: none !important;
-    }
-</style>
+                const image = new Image();
+                image.onload = function () {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                };
+                image.src = dataUrl;
+            }
+
+            document.getElementById('clearSignature').addEventListener('click', function () {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                signatureInput.value = '';
+                hasDrawn = false;
+                renderPreview('');
+            });
+
+            document.getElementById('saveSignature').addEventListener('click', function () {
+                const dataUrl = canvas.toDataURL('image/png');
+                signatureInput.value = dataUrl;
+                renderPreview(dataUrl);
+                hasDrawn = false;
+            });
+
+            if (signatureInput.value) {
+                renderPreview(signatureInput.value);
+                loadSignatureOnCanvas(signatureInput.value);
+            }
+
+            if (form) {
+                form.addEventListener('submit', function () {
+                    if (hasDrawn && !signatureInput.value) {
+                        const dataUrl = canvas.toDataURL('image/png');
+                        signatureInput.value = dataUrl;
+                        renderPreview(dataUrl);
+                    }
+                });
+            }
+        });
+    </script>
 @endsection
