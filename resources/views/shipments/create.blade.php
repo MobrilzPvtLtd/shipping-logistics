@@ -162,6 +162,7 @@
             <div class="flex justify-center gap-2 mb-4">
                 <a href="{{ route('shipments.invoices.index', $shipment) }}" class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">{{ __('Invoice list') }}</a>
                 <a href="{{ route('shipments.invoices.create', $shipment) }}" class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">{{ __('Create invoice') }}</a>
+                <a href="{{ route('shipments.compliance-documents.index', $shipment) }}" class="px-3 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">{{ __('Compliance docs') }}</a>
             </div>
         @endif
 
@@ -185,7 +186,7 @@
         </div>
 
         @php $isEdit = isset($shipment); @endphp
-        <form method="POST" action="{{ $isEdit ? route('shipments.update', $shipment) : route('shipments.store') }}" class="space-y-6" novalidate @submit.prevent="submitForm($event)">
+        <form method="POST" action="{{ $isEdit ? route('shipments.update', $shipment) : route('shipments.store') }}" class="space-y-6" enctype="multipart/form-data" novalidate @submit.prevent="submitForm($event)">
             @csrf
             @if($isEdit)
                 @method('PUT')
@@ -1098,6 +1099,70 @@
                 <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 border-b-2 border-black pb-1 uppercase">
                     5. INSTRUCTIONS
                 </h2>
+
+                @php
+                    $compliance = old('existing_compliance_documents', optional($shipment)->compliance_documents ?? []);
+                @endphp
+
+                <div class="bg-white dark:bg-gray-800 border border-gray-300 rounded-lg overflow-hidden">
+                    <div class="p-6 space-y-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Compliance Documents') }}</h3>
+                        <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
+                            @foreach ([
+                                'cbp_form_5106' => 'CBP Form 5106',
+                                'power_of_attorney' => 'Power of Attorney',
+                                'vi_excise_tax_credit_card_form' => 'VI Excise Tax Credit Card Form',
+                            ] as $key => $label)
+                                @php
+                                    $document = $compliance[$key] ?? null;
+                                    $status = data_get($document, 'status');
+                                @endphp
+                                <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $label }}</p>
+                                            <p class="text-xs text-gray-500">{{ __('Admin will review your upload. You cannot accept documents yourself.') }}</p>
+                                        </div>
+                                        @if($status === 'accepted')
+                                            <span class="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2.5 py-1 text-[11px] font-semibold">{{ __('Accepted') }}</span>
+                                        @elseif($status === 'rejected')
+                                            <span class="inline-flex items-center rounded-full bg-red-100 text-red-800 px-2.5 py-1 text-[11px] font-semibold">{{ __('Rejected') }}</span>
+                                        @elseif(!empty($document['path']))
+                                            <span class="inline-flex items-center rounded-full bg-blue-100 text-blue-800 px-2.5 py-1 text-[11px] font-semibold">{{ __('Uploaded') }}</span>
+                                        @else
+                                            <span class="inline-flex items-center rounded-full bg-gray-100 text-gray-700 px-2.5 py-1 text-[11px] font-semibold">{{ __('Not Uploaded') }}</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="mt-4 space-y-3">
+                                        @if(!empty($document['path']))
+                                            <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                                                <p>{{ __('Current file:') }} {{ basename($document['path']) }}</p>
+                                                <p class="text-xs text-gray-500">{{ __('Uploaded at:') }} {{ $document['uploaded_at'] ?? '-' }}</p>
+                                            </div>
+                                            <div class="flex gap-2 flex-wrap mt-2">
+                                                <a href="{{ asset('storage/' . $document['path']) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">{{ __('View / Download') }}</a>
+                                            </div>
+                                        @endif
+
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Upload file') }}</label>
+                                        <input type="file" name="compliance_documents[{{ $key }}]" accept=".pdf,.jpg,.jpeg,.png,.tiff" class="block w-full text-sm text-gray-900 dark:text-gray-100 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+
+                                        @if($status === 'rejected' && !empty($document['rejection_reason']))
+                                            <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                                                <p class="font-semibold">{{ __('Rejection reason:') }}</p>
+                                                <p>{{ $document['rejection_reason'] }}</p>
+                                                <p class="mt-2 text-xs text-red-700">{{ __('Please re-upload this document and submit again.') }}</p>
+                                            </div>
+                                        @endif
+
+                                        <input type="hidden" name="existing_compliance_documents[{{ $key }}]" value="{{ $document['path'] ?? '' }}" />
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
 
                 <div class="bg-white dark:bg-gray-800 border border-gray-300 rounded-lg overflow-hidden">
                     <!-- Scrollable content area -->

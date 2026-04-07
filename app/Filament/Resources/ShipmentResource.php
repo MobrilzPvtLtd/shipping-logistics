@@ -3,10 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ShipmentResource\Pages;
+use App\Filament\Resources\ShipmentResource\RelationManagers\InvoicesRelationManager;
 use App\Models\Shipment;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\View;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -45,6 +47,9 @@ class ShipmentResource extends Resource
                 Textarea::make('destination_address')
                     ->label('Destination Address')
                     ->rows(3),
+                View::make('filament.shipments.compliance-documents')
+                    ->visible(fn (?string $operation): bool => $operation === 'view')
+                    ->columnSpan('full'),
                 Select::make('status')
                     ->options([
                         'pending' => 'Pending',
@@ -63,6 +68,14 @@ class ShipmentResource extends Resource
                 TextColumn::make('tracking_number')->sortable()->searchable(),
                 TextColumn::make('sender_name')->label('Sender')->sortable()->searchable(),
                 TextColumn::make('receiver_name')->label('Receiver')->sortable()->searchable(),
+                TextColumn::make('compliance_documents')
+                    ->label('Compliance Docs')
+                    ->getStateUsing(fn ($record) => collect($record->compliance_documents ?? [])
+                        ->filter(fn ($document) => ! empty($document['path']))
+                        ->map(fn ($document) => basename($document['path']))
+                        ->pipe(fn ($items) => $items->isNotEmpty() ? $items->join(', ') : 'None'))
+                    ->wrap()
+                    ->limit(3),
                 TextColumn::make('status')->sortable(),
                 TextColumn::make('created_at')->dateTime()->sortable(),
             ])
@@ -80,6 +93,13 @@ class ShipmentResource extends Resource
             'create' => Pages\CreateShipment::route('/create'),
             'view' => Pages\ViewShipment::route('/{record}'),
             'edit' => Pages\EditShipment::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            InvoicesRelationManager::class,
         ];
     }
 

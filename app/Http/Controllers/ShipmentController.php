@@ -6,6 +6,7 @@ use App\Models\Shipment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -13,11 +14,16 @@ class ShipmentController extends Controller
 {
     protected function canManageShipment(Shipment $shipment): bool
     {
-        if (Auth::user()->hasRole('Warehouse Staff')) {
+        if (Auth::user()->hasAnyRole(['Warehouse Staff', 'Admin', 'Super Admin'])) {
             return $shipment->status === 'pending';
         }
 
         return $shipment->user_id === Auth::id() && $shipment->status === 'pending';
+    }
+
+    protected function canViewShipment(Shipment $shipment): bool
+    {
+        return Auth::user()->hasAnyRole(['Warehouse Staff', 'Admin', 'Super Admin']) || $shipment->user_id === Auth::id();
     }
 
     public function index(): View
@@ -26,13 +32,38 @@ class ShipmentController extends Controller
 
         $user = Auth::user();
 
-        if ($user->hasRole('Warehouse Staff')) {
-            $shipments = Shipment::where('status', 'pending')->latest()->paginate(10);
+        if ($user->hasAnyRole(['Warehouse Staff', 'Admin', 'Super Admin'])) {
+            $shipments = Shipment::latest()->paginate(10);
         } else {
             $shipments = Shipment::where('user_id', Auth::id())->latest()->paginate(10);
         }
 
         return view('shipments.index', compact('shipments'));
+    }
+
+    protected function processComplianceDocuments(Request $request, array $existing = []): array
+    {
+        $keys = ['cbp_form_5106', 'power_of_attorney', 'vi_excise_tax_credit_card_form'];
+        $documents = [];
+
+        foreach ($keys as $key) {
+            $existingDocument = $existing[$key] ?? [];
+
+            if ($request->hasFile("compliance_documents.$key")) {
+                $file = $request->file("compliance_documents.$key");
+                $path = $file->store('compliance_documents', 'public');
+
+                $documents[$key] = [
+                    'path' => $path,
+                    'uploaded_at' => now()->format('Y-m-d H:i:s'),
+                    'status' => 'uploaded',
+                ];
+            } elseif (!empty($existingDocument['path'])) {
+                $documents[$key] = $existingDocument;
+            }
+        }
+
+        return $documents;
     }
 
     public function create(): View
@@ -56,6 +87,10 @@ class ShipmentController extends Controller
             'package_count' => 'nullable|integer|min:1',
             'status' => 'nullable|in:pending,in_transit,delivered,cancelled',
             'description' => 'nullable|string|max:2000',
+            'existing_compliance_documents' => 'nullable|array',
+            'existing_compliance_documents.*' => 'nullable|string',
+            'compliance_documents' => 'nullable|array',
+            'compliance_documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,tiff|max:10240',
 
             'importer_name' => 'nullable|string|max:255',
             'id_type' => 'nullable|in:EIN,SSN,CBP,REQUEST_CBP',
@@ -137,6 +172,8 @@ class ShipmentController extends Controller
             $data[$field] = $request->has($field);
         }
 
+        $data['compliance_documents'] = $this->processComplianceDocuments($request);
+
         if (empty($data['tracking_number'])) {
             $data['tracking_number'] = 'SHIP'. '-' . Shipment::generateTrackingNumber(Auth::user());
         }
@@ -169,6 +206,10 @@ class ShipmentController extends Controller
             'package_count' => 'nullable|integer|min:1',
             'status' => 'nullable|in:pending,in_transit,delivered,cancelled',
             'description' => 'nullable|string|max:2000',
+            'existing_compliance_documents' => 'nullable|array',
+            'existing_compliance_documents.*' => 'nullable|string',
+            'compliance_documents' => 'nullable|array',
+            'compliance_documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,tiff|max:10240',
 
             'importer_name' => 'nullable|string|max:255',
             'id_type' => 'nullable|in:EIN,SSN,CBP,REQUEST_CBP',
@@ -247,6 +288,8 @@ class ShipmentController extends Controller
         foreach ($checkboxFields as $field) {
             $data[$field] = $request->has($field);
         }
+
+        $data['compliance_documents'] = $this->processComplianceDocuments($request, $shipment->compliance_documents ?? []);
 
         $shipment->update($data);
 

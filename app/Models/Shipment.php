@@ -87,6 +87,7 @@ class Shipment extends Model
         'cert_date',
         'broker_name',
         'broker_phone',
+        'compliance_documents',
     ];
 
     protected $casts = [
@@ -100,6 +101,7 @@ class Shipment extends Model
         'use' => 'array',
         'related' => 'array',
         'officer' => 'array',
+        'compliance_documents' => 'array',
     ];
 
     public static function generateTrackingNumber(?User $user = null): string

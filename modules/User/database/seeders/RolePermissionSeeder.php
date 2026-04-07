@@ -39,6 +39,12 @@ class RolePermissionSeeder extends Seeder
             'create-shipments',
             'edit-shipments',
             'delete-shipments',
+            'view-invoices',
+            'create-invoices',
+            'edit-invoices',
+            'delete-invoices',
+            'view-compliance-documents',
+            'upload-compliance-documents',
         ];
 
         foreach ($permissions as $permission) {
@@ -55,6 +61,9 @@ class RolePermissionSeeder extends Seeder
             'create-users',
             'edit-users',
             'view-roles',
+            'create-roles',
+            'edit-roles',
+            'delete-roles',
             'view-permissions',
             'view-blog',
             'create-blog',
@@ -66,6 +75,12 @@ class RolePermissionSeeder extends Seeder
             'create-shipments',
             'edit-shipments',
             'delete-shipments',
+            'view-invoices',
+            'create-invoices',
+            'edit-invoices',
+            'delete-invoices',
+            'view-compliance-documents',
+            'upload-compliance-documents',
         ]);
 
         $warehouseRole = Role::firstOrCreate(['name' => 'Warehouse Staff']);
@@ -76,10 +91,24 @@ class RolePermissionSeeder extends Seeder
             'view-shipments',
             'create-shipments',
             'edit-shipments',
+            'view-invoices',
+            'view-compliance-documents',
         ]);
 
         $userRole = Role::firstOrCreate(['name' => 'User']);
-        $userRole->syncPermissions(['view-blog', 'view-shipments', 'create-shipments', 'edit-shipments', 'delete-shipments']);
+        $userRole->syncPermissions([
+            'view-blog',
+            'view-shipments',
+            'create-shipments',
+            'edit-shipments',
+            'delete-shipments',
+            'view-invoices',
+            'create-invoices',
+            'edit-invoices',
+            'delete-invoices',
+            'view-compliance-documents',
+            'upload-compliance-documents',
+        ]);
 
         // Assign Admin role to existing admin user
         $admin = User::where('email', 'admin@laracorekit.com')->first();

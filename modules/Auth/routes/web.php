@@ -87,6 +87,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::put('/shipments/{shipment}/invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'update'])->name('shipments.invoices.update');
     Route::get('/shipments/{shipment}/invoices/{invoice}/download', [\App\Http\Controllers\InvoiceController::class, 'download'])->name('shipments.invoices.download');
     Route::delete('/shipments/{shipment}/invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'destroy'])->name('shipments.invoices.destroy');
+
+    Route::get('/shipments/{shipment}/compliance-documents', [\App\Http\Controllers\ComplianceDocumentController::class, 'index'])->name('shipments.compliance-documents.index');
+    Route::get('/shipments/{shipment}/compliance-documents/{key}/download', [\App\Http\Controllers\ComplianceDocumentController::class, 'download'])->name('shipments.compliance-documents.download');
 });
 
 Route::post('/logout', function () {

@@ -12,9 +12,17 @@ use Illuminate\View\View;
 
 class InvoiceController extends Controller
 {
+    protected function canAccessShipmentInvoices(Shipment $shipment): bool
+    {
+        return Auth::user()->can('view-shipments') && Auth::user()->can('view-invoices') && (
+            $shipment->user_id === Auth::id() ||
+            Auth::user()->hasRole(['Super Admin', 'Admin', 'Warehouse Staff'])
+        );
+    }
+
     public function index(Shipment $shipment): View
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless($this->canAccessShipmentInvoices($shipment), 403);
 
         $invoices = $shipment->invoices()->latest()->get();
 
@@ -23,14 +31,14 @@ class InvoiceController extends Controller
 
     public function create(Shipment $shipment): View
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless($this->canAccessShipmentInvoices($shipment), 403);
 
         return view('invoices.create', compact('shipment'));
     }
 
     public function store(Request $request, Shipment $shipment): RedirectResponse
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless($this->canAccessShipmentInvoices($shipment), 403);
 
         $data = $request->validate([
             'invoice_number' => 'nullable|string|max:255',
@@ -90,7 +98,7 @@ class InvoiceController extends Controller
 
     public function edit(Shipment $shipment, Invoice $invoice): View
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless($this->canAccessShipmentInvoices($shipment), 403);
         abort_unless($invoice->shipment_id === $shipment->id, 404);
 
         return view('invoices.create', compact('shipment', 'invoice'));
@@ -98,7 +106,7 @@ class InvoiceController extends Controller
 
     public function update(Request $request, Shipment $shipment, Invoice $invoice): RedirectResponse
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless($this->canAccessShipmentInvoices($shipment), 403);
         abort_unless($invoice->shipment_id === $shipment->id, 404);
 
         $data = $request->validate([
@@ -157,7 +165,7 @@ class InvoiceController extends Controller
 
     public function download(Shipment $shipment, Invoice $invoice)
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless($this->canAccessShipmentInvoices($shipment), 403);
         abort_unless($invoice->shipment_id === $shipment->id, 404);
 
         return Storage::disk('public')->download($invoice->file_path);
@@ -165,7 +173,7 @@ class InvoiceController extends Controller
 
     public function destroy(Shipment $shipment, Invoice $invoice): RedirectResponse
     {
-        abort_unless($shipment->user_id === Auth::id(), 403);
+        abort_unless($this->canAccessShipmentInvoices($shipment), 403);
         abort_unless($invoice->shipment_id === $shipment->id, 404);
 
         if ($invoice->file_path && Storage::disk('public')->exists($invoice->file_path)) {
