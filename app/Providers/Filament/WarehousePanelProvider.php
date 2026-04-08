@@ -40,6 +40,8 @@ class WarehousePanelProvider extends PanelProvider
             ->resources([
                 \Modules\Blog\Filament\Resources\BlogResource::class,
                 \App\Filament\Resources\ShipmentResource::class,
+                \App\Filament\Resources\PackageResource::class,
+                \App\Filament\Resources\InvoiceResource::class,
             ])
             ->pages([
                 \App\Filament\Pages\Dashboard::class,

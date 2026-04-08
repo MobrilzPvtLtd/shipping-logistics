@@ -1,35 +1,41 @@
 <?php
 
-namespace App\Filament\Resources\ShipmentResource\RelationManagers;
+namespace App\Filament\Resources;
 
+use App\Filament\Resources\InvoiceResource\Pages;
+use App\Models\Invoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\Resource;
+use Filament\Tables\Table;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Illuminate\Database\Eloquent\Model;
 
-class InvoicesRelationManager extends RelationManager
+class InvoiceResource extends Resource
 {
-    protected static string $relationship = 'invoices';
+    protected static ?string $model = Invoice::class;
 
-    protected static ?string $recordTitleAttribute = 'invoice_number';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $label = 'Invoice';
-    protected static ?string $pluralLabel = 'Invoices';
-    protected static ?string $title = 'Invoices';
+    protected static string|\UnitEnum|null $navigationGroup = 'Logistics';
 
-    public function form(Schema $schema): Schema
+    protected static ?int $navigationSort = 4;
+
+    public static function form(Schema $schema): Schema
     {
         return $schema
             ->schema([
+                Select::make('shipment_id')
+                    ->label('Shipment')
+                    ->relationship('shipment', 'tracking_number')
+                    ->searchable()
+                    ->required(),
                 TextInput::make('invoice_number')
                     ->label('Invoice Number')
                     ->required()
@@ -38,10 +44,11 @@ class InvoicesRelationManager extends RelationManager
                     ->label('Invoice Date')
                     ->required(),
                 TextInput::make('currency')
+                    ->label('Currency')
                     ->required()
                     ->maxLength(10),
                 TextInput::make('total_invoice_value')
-                    ->label('Total Value')
+                    ->label('Total Invoice Value')
                     ->numeric()
                     ->required(),
                 Textarea::make('commodity_description')
@@ -72,10 +79,14 @@ class InvoicesRelationManager extends RelationManager
             ]);
     }
 
-    public function table(Tables\Table $table): Tables\Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([
+                TextColumn::make('shipment.tracking_number')
+                    ->label('Shipment')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('invoice_number')
                     ->label('Invoice Number')
                     ->sortable()
@@ -90,46 +101,40 @@ class InvoicesRelationManager extends RelationManager
                 TextColumn::make('total_invoice_value')
                     ->label('Total Value')
                     ->sortable(),
-                TextColumn::make('file_path')
-                    ->label('File Path')
-                    ->limit(30),
-            ])
-            ->headerActions([
-                CreateAction::make()
-                    ->label('Add Invoice')
-                    ->visible(fn (): bool => auth()->user()?->can('create-invoices') ?? false),
             ])
             ->actions([
-                ViewAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('view-invoices') ?? false),
-                EditAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('edit-invoices') ?? false),
-                DeleteAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('delete-invoices') ?? false),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 
-    protected function canViewAny(): bool
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListInvoices::route('/'),
+            'create' => Pages\CreateInvoice::route('/create'),
+            'view' => Pages\ViewInvoice::route('/{record}'),
+            'edit' => Pages\EditInvoice::route('/{record}/edit'),
+        ];
+    }
+
+    public static function canViewAny(): bool
     {
         return auth()->user()?->can('view-invoices') ?? false;
     }
 
-    protected function canView(Model $record): bool
-    {
-        return auth()->user()?->can('view-invoices') ?? false;
-    }
-
-    protected function canCreate(): bool
+    public static function canCreate(): bool
     {
         return auth()->user()?->can('create-invoices') ?? false;
     }
 
-    protected function canEdit(Model $record): bool
+    public static function canEdit($record): bool
     {
         return auth()->user()?->can('edit-invoices') ?? false;
     }
 
-    protected function canDelete(Model $record): bool
+    public static function canDelete($record): bool
     {
         return auth()->user()?->can('delete-invoices') ?? false;
     }
