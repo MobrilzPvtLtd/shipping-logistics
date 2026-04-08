@@ -48,44 +48,43 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $shipment->created_at->format('Y-m-d') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm flex flex-wrap gap-3 items-center">
-                            <a href="{{ route('shipments.invoices.index', $shipment) }}" class="text-indigo-600 hover:text-indigo-900" title="{{ __('Invoices') }}" aria-label="{{ __('Invoices') }}">
-                                <span class="sr-only">{{ __('Invoices') }}</span>
+                            <a href="{{ route('shipments.invoices.index', $shipment) }}" class="group inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900" title="{{ __('Invoices') }}" aria-label="{{ __('Invoices') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                     <path d="M9 12h6" />
                                     <path d="M9 16h6" />
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
                                     <path d="M14 2v6h6" />
                                 </svg>
+                                <span class="hidden group-hover:inline text-xs font-medium">{{ __('Invoices') }}</span>
                             </a>
-                            <a href="{{ route('shipments.invoices.create', $shipment) }}" class="text-green-600 hover:text-green-900" title="{{ __('Add Invoice') }}" aria-label="{{ __('Add Invoice') }}">
-                                <span class="sr-only">{{ __('Add Invoice') }}</span>
+                            <a href="{{ route('shipments.invoices.create', $shipment) }}" class="group inline-flex items-center gap-2 text-green-600 hover:text-green-900" title="{{ __('Add Invoice') }}" aria-label="{{ __('Add Invoice') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                     <path d="M12 5v14" />
                                     <path d="M5 12h14" />
                                     <path d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
                                 </svg>
+                                <span class="hidden group-hover:inline text-xs font-medium">{{ __('Add Invoice') }}</span>
                             </a>
-                            <a href="{{ route('shipments.compliance-documents.index', $shipment) }}" class="text-teal-600 hover:text-teal-900" title="{{ __('Compliance Docs') }}" aria-label="{{ __('Compliance Docs') }}">
-                                <span class="sr-only">{{ __('Compliance Docs') }}</span>
+                            <a href="{{ route('shipments.compliance-documents.index', $shipment) }}" class="group inline-flex items-center gap-2 text-teal-600 hover:text-teal-900" title="{{ __('Compliance Docs') }}" aria-label="{{ __('Compliance Docs') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                                     <path d="M9 12l2 2 4-4" />
                                 </svg>
+                                <span class="hidden group-hover:inline text-xs font-medium">{{ __('Compliance Docs') }}</span>
                             </a>
 
                             @if ($shipment->status === 'pending')
-                                <a href="{{ route('shipments.edit', $shipment) }}" class="text-blue-600 hover:text-blue-900" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
-                                    <span class="sr-only">{{ __('Edit') }}</span>
+                                <a href="{{ route('shipments.edit', $shipment) }}" class="group inline-flex items-center gap-2 text-blue-600 hover:text-blue-900" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                         <path d="M12 20h9" />
                                         <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
                                     </svg>
+                                    <span class="hidden group-hover:inline text-xs font-medium">{{ __('Edit') }}</span>
                                 </a>
                                 <form method="POST" action="{{ route('shipments.destroy', $shipment) }}" onsubmit="return confirm('{{ __('Delete this shipment?') }}');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900" title="{{ __('Delete') }}" aria-label="{{ __('Delete') }}">
-                                        <span class="sr-only">{{ __('Delete') }}</span>
+                                    <button type="submit" class="group inline-flex items-center gap-2 text-red-600 hover:text-red-900" title="{{ __('Delete') }}" aria-label="{{ __('Delete') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                             <path d="M3 6h18" />
                                             <path d="M8 6v14a2 2 0 002 2h4a2 2 0 002-2V6" />
@@ -93,6 +92,7 @@
                                             <path d="M14 11v6" />
                                             <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                                         </svg>
+                                        <span class="hidden group-hover:inline text-xs font-medium">{{ __('Delete') }}</span>
                                     </button>
                                 </form>
                             @else
