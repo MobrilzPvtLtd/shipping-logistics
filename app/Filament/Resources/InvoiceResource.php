@@ -17,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\CreateAction;
 
 class InvoiceResource extends Resource
 {
@@ -104,6 +105,7 @@ class InvoiceResource extends Resource
                     ->sortable(),
             ])
             ->actions([
+                CreateAction::make(),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
@@ -125,6 +127,11 @@ class InvoiceResource extends Resource
         return auth()->user()?->can('view-invoices') ?? false;
     }
 
+    public static function canView($record): bool
+    {
+        return auth()->user()?->can('view-invoices') ?? false;
+    }
+
     public static function canCreate(): bool
     {
         return auth()->user()?->can('create-invoices') ?? false;
@@ -138,5 +145,10 @@ class InvoiceResource extends Resource
     public static function canDelete($record): bool
     {
         return auth()->user()?->can('delete-invoices') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('view-invoices') ?? false;
     }
 }

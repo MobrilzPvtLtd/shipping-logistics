@@ -18,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\CreateAction;
 
 class ShipmentResource extends Resource
 {
@@ -53,7 +54,7 @@ class ShipmentResource extends Resource
                     ->columnSpan('full'),
                 Select::make('status')
                     ->options([
-                        'pending' => 'Submitted',
+                        'pending' => '  ',
                         'warehouse_received' => 'Warehouse Received',
                         'in_transit' => 'In Transit',
                         'delivered' => 'Delivered',
@@ -84,6 +85,7 @@ class ShipmentResource extends Resource
                 TextColumn::make('created_at')->label('Submitted At')->dateTime()->sortable(),
             ])
             ->actions([
+                CreateAction::make(),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
@@ -113,6 +115,11 @@ class ShipmentResource extends Resource
         return auth()->user()?->can('view-shipments') ?? false;
     }
 
+    public static function canView($record): bool
+    {
+        return auth()->user()?->can('view-shipments') ?? false;
+    }
+
     public static function canCreate(): bool
     {
         return auth()->user()?->can('create-shipments') ?? false;
@@ -128,3 +135,6 @@ class ShipmentResource extends Resource
         return auth()->user()?->can('delete-shipments') ?? false;
     }
 }
+
+
+

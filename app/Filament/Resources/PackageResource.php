@@ -17,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\CreateAction;
 
 class PackageResource extends Resource
 {
@@ -107,6 +108,7 @@ class PackageResource extends Resource
                     ->sortable(),
             ])
             ->actions([
+                CreateAction::make(),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
@@ -128,6 +130,11 @@ class PackageResource extends Resource
         return auth()->user()?->can('view-packages') ?? false;
     }
 
+    public static function canView($record): bool
+    {
+        return auth()->user()?->can('view-packages') ?? false;
+    }
+
     public static function canCreate(): bool
     {
         return auth()->user()?->can('create-packages') ?? false;
@@ -141,5 +148,10 @@ class PackageResource extends Resource
     public static function canDelete($record): bool
     {
         return auth()->user()?->can('delete-packages') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('view-packages') ?? false;
     }
 }
