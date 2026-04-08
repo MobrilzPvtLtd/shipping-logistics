@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use BackedEnum;
 use App\Filament\Resources\PackageResource\Pages;
 use App\Models\Package;
 use Filament\Forms\Components\FileUpload;
@@ -21,7 +22,7 @@ class PackageResource extends Resource
 {
     protected static ?string $model = Package::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cube';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cube';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Logistics';
 
