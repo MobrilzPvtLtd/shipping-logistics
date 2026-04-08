@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ShipmentResource\Pages;
 use App\Filament\Resources\ShipmentResource\RelationManagers\InvoicesRelationManager;
+use App\Filament\Resources\ShipmentResource\RelationManagers\PackagesRelationManager;
 use App\Models\Shipment;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -52,7 +53,8 @@ class ShipmentResource extends Resource
                     ->columnSpan('full'),
                 Select::make('status')
                     ->options([
-                        'pending' => 'Pending',
+                        'pending' => 'Submitted',
+                        'warehouse_received' => 'Warehouse Received',
                         'in_transit' => 'In Transit',
                         'delivered' => 'Delivered',
                         'cancelled' => 'Cancelled',
@@ -66,18 +68,20 @@ class ShipmentResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('tracking_number')->sortable()->searchable(),
-                TextColumn::make('sender_name')->label('Sender')->sortable()->searchable(),
-                TextColumn::make('receiver_name')->label('Receiver')->sortable()->searchable(),
-                TextColumn::make('compliance_documents')
-                    ->label('Compliance Docs')
-                    ->getStateUsing(fn ($record) => collect($record->compliance_documents ?? [])
-                        ->filter(fn ($document) => ! empty($document['path']))
-                        ->map(fn ($document) => basename($document['path']))
-                        ->pipe(fn ($items) => $items->isNotEmpty() ? $items->join(', ') : 'None'))
-                    ->wrap()
-                    ->limit(3),
-                TextColumn::make('status')->sortable(),
-                TextColumn::make('created_at')->dateTime()->sortable(),
+                TextColumn::make('importer_name')->label('Customer')->sortable()->searchable(),
+                TextColumn::make('invoices_count')->counts('invoices')->label('Invoices')->sortable(),
+                TextColumn::make('packages_count')->counts('packages')->label('Packages')->sortable(),
+                TextColumn::make('status')
+                    ->sortable()
+                    ->formatStateUsing(fn (?string $state) => match ($state) {
+                        'pending' => 'Submitted',
+                        'warehouse_received' => 'Warehouse Received',
+                        'in_transit' => 'In Transit',
+                        'delivered' => 'Delivered',
+                        'cancelled' => 'Cancelled',
+                        default => $state,
+                    }),
+                TextColumn::make('created_at')->label('Submitted At')->dateTime()->sortable(),
             ])
             ->actions([
                 ViewAction::make(),
@@ -100,6 +104,7 @@ class ShipmentResource extends Resource
     {
         return [
             InvoicesRelationManager::class,
+            PackagesRelationManager::class,
         ];
     }
 

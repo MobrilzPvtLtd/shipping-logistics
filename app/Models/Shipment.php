@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Invoice;
+use App\Models\Package;
 use Modules\User\Models\User;
 
 class Shipment extends Model
@@ -104,6 +105,28 @@ class Shipment extends Model
         'compliance_documents' => 'array',
     ];
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_WAREHOUSE_RECEIVED = 'warehouse_received';
+    public const STATUS_IN_TRANSIT = 'in_transit';
+    public const STATUS_DELIVERED = 'delivered';
+    public const STATUS_CANCELLED = 'cancelled';
+
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_PENDING => 'Submitted',
+            self::STATUS_WAREHOUSE_RECEIVED => 'Warehouse Received',
+            self::STATUS_IN_TRANSIT => 'In Transit',
+            self::STATUS_DELIVERED => 'Delivered',
+            self::STATUS_CANCELLED => 'Cancelled',
+        ];
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return self::statusLabels()[$this->status] ?? ucfirst(str_replace('_', ' ', $this->status));
+    }
+
     public static function generateTrackingNumber(?User $user = null): string
     {
         $user = $user ?: Auth::user();
@@ -154,5 +177,10 @@ class Shipment extends Model
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function packages()
+    {
+        return $this->hasMany(Package::class);
     }
 }

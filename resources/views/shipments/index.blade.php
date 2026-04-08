@@ -27,6 +27,7 @@
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Contact') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Sender') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Receiver') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Invoices') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Status') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Created') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Actions') }}</th>
@@ -43,13 +44,15 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ $shipment->sender_name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ $shipment->receiver_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{{ $shipment->invoices_count ?? $shipment->invoices->count() }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200">{{ ucfirst(str_replace('_', ' ', $shipment->status)) }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $shipment->created_at->format('Y-m-d') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm flex flex-wrap gap-3 items-center">
-                            <a href="{{ route('shipments.invoices.index', $shipment) }}" class="group inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900" title="{{ __('Invoices') }}" aria-label="{{ __('Invoices') }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                            @unless($isWarehouse)
+                                <a href="{{ route('shipments.invoices.index', $shipment) }}" class="group inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900" title="{{ __('Invoices') }}" aria-label="{{ __('Invoices') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                     <path d="M9 12h6" />
                                     <path d="M9 16h6" />
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
@@ -72,6 +75,7 @@
                                 </svg>
                                 <span class="hidden group-hover:inline text-xs font-medium">{{ __('Compliance Docs') }}</span>
                             </a>
+                            @endunless
 
                             @if ($shipment->status === 'pending')
                                 <a href="{{ route('shipments.edit', $shipment) }}" class="group inline-flex items-center gap-2 text-blue-600 hover:text-blue-900" title="{{ __('Edit') }}" aria-label="{{ __('Edit') }}">
@@ -102,7 +106,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('No shipments yet.') }}</td>
+                        <td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('No shipments yet.') }}</td>
                     </tr>
                 @endforelse
             </tbody>

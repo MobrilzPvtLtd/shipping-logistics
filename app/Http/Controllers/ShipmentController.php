@@ -14,11 +14,15 @@ class ShipmentController extends Controller
 {
     protected function canManageShipment(Shipment $shipment): bool
     {
-        if (Auth::user()->hasAnyRole(['Warehouse Staff', 'Admin', 'Super Admin'])) {
-            return $shipment->status === 'pending';
+        if (Auth::user()->hasRole('Warehouse Staff')) {
+            return in_array($shipment->status, [Shipment::STATUS_PENDING, Shipment::STATUS_WAREHOUSE_RECEIVED], true);
         }
 
-        return $shipment->user_id === Auth::id() && $shipment->status === 'pending';
+        if (Auth::user()->hasAnyRole(['Admin', 'Super Admin'])) {
+            return $shipment->status === Shipment::STATUS_PENDING;
+        }
+
+        return $shipment->user_id === Auth::id() && $shipment->status === Shipment::STATUS_PENDING;
     }
 
     protected function canViewShipment(Shipment $shipment): bool
@@ -32,10 +36,18 @@ class ShipmentController extends Controller
 
         $user = Auth::user();
 
-        if ($user->hasAnyRole(['Warehouse Staff', 'Admin', 'Super Admin'])) {
-            $shipments = Shipment::latest()->paginate(10);
+        if ($user->hasRole('Warehouse Staff')) {
+            $shipments = Shipment::withCount('invoices')
+                ->where('status', Shipment::STATUS_PENDING)
+                ->latest()
+                ->paginate(10);
+        } elseif ($user->hasAnyRole(['Admin', 'Super Admin'])) {
+            $shipments = Shipment::withCount('invoices')->latest()->paginate(10);
         } else {
-            $shipments = Shipment::where('user_id', Auth::id())->latest()->paginate(10);
+            $shipments = Shipment::withCount('invoices')
+                ->where('user_id', Auth::id())
+                ->latest()
+                ->paginate(10);
         }
 
         return view('shipments.index', compact('shipments'));
@@ -85,7 +97,7 @@ class ShipmentController extends Controller
             'destination_address' => 'nullable|string|max:1000',
             'weight_kg' => 'nullable|numeric|min:0',
             'package_count' => 'nullable|integer|min:1',
-            'status' => 'nullable|in:pending,in_transit,delivered,cancelled',
+            'status' => 'nullable|in:pending,warehouse_received,in_transit,delivered,cancelled',
             'description' => 'nullable|string|max:2000',
             'existing_compliance_documents' => 'nullable|array',
             'existing_compliance_documents.*' => 'nullable|string',
@@ -204,7 +216,7 @@ class ShipmentController extends Controller
             'destination_address' => 'nullable|string|max:1000',
             'weight_kg' => 'nullable|numeric|min:0',
             'package_count' => 'nullable|integer|min:1',
-            'status' => 'nullable|in:pending,in_transit,delivered,cancelled',
+            'status' => 'nullable|in:pending,warehouse_received,in_transit,delivered,cancelled',
             'description' => 'nullable|string|max:2000',
             'existing_compliance_documents' => 'nullable|array',
             'existing_compliance_documents.*' => 'nullable|string',
