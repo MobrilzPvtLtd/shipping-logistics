@@ -84,8 +84,10 @@ class ShipmentResource extends Resource
                     }),
                 TextColumn::make('created_at')->label('Submitted At')->dateTime()->sortable(),
             ])
-            ->actions([
+            ->headerActions([
                 CreateAction::make(),
+            ])
+            ->actions([
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),

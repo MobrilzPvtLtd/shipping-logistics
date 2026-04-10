@@ -18,6 +18,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\CreateAction;
+use Illuminate\Support\Facades\Auth;
+use Modules\User\Models\User as UserModel;
 
 class InvoiceResource extends Resource
 {
@@ -104,12 +106,27 @@ class InvoiceResource extends Resource
                     ->label('Total Value')
                     ->sortable(),
             ])
-            ->actions([
+            ->headerActions([
                 CreateAction::make(),
+            ])
+            ->actions([
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ]);
+    }
+
+    protected static function getCurrentUser(): ?UserModel
+    {
+        /** @var UserModel|null $user */
+        $user = Auth::user();
+
+        return $user;
+    }
+
+    protected static function hasSuperAdminAccess(): bool
+    {
+        return self::getCurrentUser()?->hasRole('Super Admin') ?? false;
     }
 
     public static function getPages(): array
@@ -124,31 +141,43 @@ class InvoiceResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->can('view-invoices') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-invoices') ?? false);
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()?->can('view-invoices') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-invoices') ?? false);
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()?->can('create-invoices') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('create-invoices') ?? false);
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()?->can('edit-invoices') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('edit-invoices') ?? false);
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()?->can('delete-invoices') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('delete-invoices') ?? false);
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->can('view-invoices') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-invoices') ?? false);
     }
 }

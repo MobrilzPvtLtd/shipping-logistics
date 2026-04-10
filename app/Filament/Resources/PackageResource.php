@@ -18,6 +18,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\CreateAction;
+use Illuminate\Support\Facades\Auth;
+use Modules\User\Models\User as UserModel;
 
 class PackageResource extends Resource
 {
@@ -107,12 +109,27 @@ class PackageResource extends Resource
                     ->dateTime()
                     ->sortable(),
             ])
-            ->actions([
+            ->headerActions([
                 CreateAction::make(),
+            ])
+            ->actions([
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ]);
+    }
+
+    protected static function getCurrentUser(): ?UserModel
+    {
+        /** @var UserModel|null $user */
+        $user = Auth::user();
+
+        return $user;
+    }
+
+    protected static function hasSuperAdminAccess(): bool
+    {
+        return self::getCurrentUser()?->hasRole('Super Admin') ?? false;
     }
 
     public static function getPages(): array
@@ -127,31 +144,43 @@ class PackageResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->can('view-packages') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-packages') ?? false);
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()?->can('view-packages') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-packages') ?? false);
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()?->can('create-packages') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('create-packages') ?? false);
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()?->can('edit-packages') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('edit-packages') ?? false);
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()?->can('delete-packages') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('delete-packages') ?? false);
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->can('view-packages') ?? false;
+        $user = self::getCurrentUser();
+
+        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-packages') ?? false);
     }
 }
