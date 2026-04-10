@@ -14,6 +14,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Modules\User\Models\User as UserModel;
 
 class PackagesRelationManager extends RelationManager
 {
@@ -101,40 +103,63 @@ class PackagesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Add Package')
-                    ->visible(fn (): bool => auth()->user()?->can('create-packages') ?? false),
+                    ->visible(fn (): bool => $this->hasPackageAccess() || ($this->getCurrentUser()?->can('create-packages') ?? false)),
             ])
             ->actions([
                 ViewAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('view-packages') ?? false),
+                    ->visible(fn (?Model $record): bool => $this->hasPackageAccess() || ($this->getCurrentUser()?->can('view-packages') ?? false)),
                 EditAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('edit-packages') ?? false),
+                    ->visible(fn (?Model $record): bool => $this->hasPackageAccess() || ($this->getCurrentUser()?->can('edit-packages') ?? false)),
                 DeleteAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('delete-packages') ?? false),
+                    ->visible(fn (?Model $record): bool => $this->hasPackageAccess() || ($this->getCurrentUser()?->can('delete-packages') ?? false)),
             ]);
+    }
+
+    protected function getCurrentUser(): ?UserModel
+    {
+        /** @var UserModel|null $user */
+        $user = Auth::user();
+
+        return $user;
+    }
+
+    protected function hasPackageAccess(): bool
+    {
+        return $this->getCurrentUser()?->hasAnyRole(['Super Admin', 'Admin', 'Warehouse Staff']) ?? false;
     }
 
     protected function canViewAny(): bool
     {
-        return auth()->user()?->can('view-packages') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasPackageAccess() || ($user?->can('view-packages') ?? false);
     }
 
     protected function canView(Model $record): bool
     {
-        return auth()->user()?->can('view-packages') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasPackageAccess() || ($user?->can('view-packages') ?? false);
     }
 
     protected function canCreate(): bool
     {
-        return auth()->user()?->can('create-packages') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasPackageAccess() || ($user?->can('create-packages') ?? false);
     }
 
     protected function canEdit(Model $record): bool
     {
-        return auth()->user()?->can('edit-packages') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasPackageAccess() || ($user?->can('edit-packages') ?? false);
     }
 
     protected function canDelete(Model $record): bool
     {
-        return auth()->user()?->can('delete-packages') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasPackageAccess() || ($user?->can('delete-packages') ?? false);
     }
 }

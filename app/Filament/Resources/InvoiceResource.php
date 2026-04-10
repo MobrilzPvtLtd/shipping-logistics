@@ -124,9 +124,9 @@ class InvoiceResource extends Resource
         return $user;
     }
 
-    protected static function hasSuperAdminAccess(): bool
+    protected static function hasPrivilegedAccess(): bool
     {
-        return self::getCurrentUser()?->hasRole('Super Admin') ?? false;
+        return self::getCurrentUser()?->hasAnyRole(['Super Admin', 'Admin', 'Warehouse Staff']) ?? false;
     }
 
     public static function getPages(): array
@@ -143,41 +143,41 @@ class InvoiceResource extends Resource
     {
         $user = self::getCurrentUser();
 
-        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-invoices') ?? false);
+        return self::hasPrivilegedAccess() || ($user?->can('view-invoices') ?? false);
     }
 
     public static function canView($record): bool
     {
         $user = self::getCurrentUser();
 
-        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-invoices') ?? false);
+        return self::hasPrivilegedAccess() || ($user?->can('view-invoices') ?? false);
     }
 
     public static function canCreate(): bool
     {
         $user = self::getCurrentUser();
 
-        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('create-invoices') ?? false);
+        return self::hasPrivilegedAccess() || ($user?->can('create-invoices') ?? false);
     }
 
     public static function canEdit($record): bool
     {
         $user = self::getCurrentUser();
 
-        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('edit-invoices') ?? false);
+        return self::hasPrivilegedAccess() || ($user?->can('edit-invoices') ?? false);
     }
 
     public static function canDelete($record): bool
     {
         $user = self::getCurrentUser();
 
-        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('delete-invoices') ?? false);
+        return self::hasPrivilegedAccess() || ($user?->can('delete-invoices') ?? false);
     }
 
     public static function shouldRegisterNavigation(): bool
     {
         $user = self::getCurrentUser();
 
-        return ($user?->hasRole('Super Admin') ?? false) || ($user?->can('view-invoices') ?? false);
+        return self::hasPrivilegedAccess() || ($user?->can('view-invoices') ?? false);
     }
 }

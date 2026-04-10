@@ -15,6 +15,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Modules\User\Models\User as UserModel;
 
 class InvoicesRelationManager extends RelationManager
 {
@@ -97,40 +99,63 @@ class InvoicesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Add Invoice')
-                    ->visible(fn (): bool => auth()->user()?->can('create-invoices') ?? false),
+                    ->visible(fn (): bool => $this->hasInvoiceAccess() || ($this->getCurrentUser()?->can('create-invoices') ?? false)),
             ])
             ->actions([
                 ViewAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('view-invoices') ?? false),
+                    ->visible(fn (?Model $record): bool => $this->hasInvoiceAccess() || ($this->getCurrentUser()?->can('view-invoices') ?? false)),
                 EditAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('edit-invoices') ?? false),
+                    ->visible(fn (?Model $record): bool => $this->hasInvoiceAccess() || ($this->getCurrentUser()?->can('edit-invoices') ?? false)),
                 DeleteAction::make()
-                    ->visible(fn (?Model $record): bool => auth()->user()?->can('delete-invoices') ?? false),
+                    ->visible(fn (?Model $record): bool => $this->hasInvoiceAccess() || ($this->getCurrentUser()?->can('delete-invoices') ?? false)),
             ]);
+    }
+
+    protected function getCurrentUser(): ?UserModel
+    {
+        /** @var UserModel|null $user */
+        $user = Auth::user();
+
+        return $user;
+    }
+
+    protected function hasInvoiceAccess(): bool
+    {
+        return $this->getCurrentUser()?->hasAnyRole(['Super Admin', 'Admin', 'Warehouse Staff']) ?? false;
     }
 
     protected function canViewAny(): bool
     {
-        return auth()->user()?->can('view-invoices') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasInvoiceAccess() || ($user?->can('view-invoices') ?? false);
     }
 
     protected function canView(Model $record): bool
     {
-        return auth()->user()?->can('view-invoices') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasInvoiceAccess() || ($user?->can('view-invoices') ?? false);
     }
 
     protected function canCreate(): bool
     {
-        return auth()->user()?->can('create-invoices') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasInvoiceAccess() || ($user?->can('create-invoices') ?? false);
     }
 
     protected function canEdit(Model $record): bool
     {
-        return auth()->user()?->can('edit-invoices') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasInvoiceAccess() || ($user?->can('edit-invoices') ?? false);
     }
 
     protected function canDelete(Model $record): bool
     {
-        return auth()->user()?->can('delete-invoices') ?? false;
+        $user = $this->getCurrentUser();
+
+        return $this->hasInvoiceAccess() || ($user?->can('delete-invoices') ?? false);
     }
 }

@@ -19,6 +19,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\CreateAction;
+use Illuminate\Support\Facades\Auth;
+use Modules\User\Models\User as UserModel;
 
 class ShipmentResource extends Resource
 {
@@ -112,29 +114,52 @@ class ShipmentResource extends Resource
         ];
     }
 
+    protected static function getCurrentUser(): ?UserModel
+    {
+        /** @var UserModel|null $user */
+        $user = Auth::user();
+
+        return $user;
+    }
+
+    protected static function hasPrivilegedAccess(): bool
+    {
+        return self::getCurrentUser()?->hasAnyRole(['Super Admin', 'Admin', 'Warehouse Staff']) ?? false;
+    }
+
     public static function canViewAny(): bool
     {
-        return auth()->user()?->can('view-shipments') ?? false;
+        $user = self::getCurrentUser();
+
+        return self::hasPrivilegedAccess() || ($user?->can('view-shipments') ?? false);
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()?->can('view-shipments') ?? false;
+        $user = self::getCurrentUser();
+
+        return self::hasPrivilegedAccess() || ($user?->can('view-shipments') ?? false);
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()?->can('create-shipments') ?? false;
+        $user = self::getCurrentUser();
+
+        return self::hasPrivilegedAccess() || ($user?->can('create-shipments') ?? false);
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()?->can('edit-shipments') ?? false;
+        $user = self::getCurrentUser();
+
+        return self::hasPrivilegedAccess() || ($user?->can('edit-shipments') ?? false);
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()?->can('delete-shipments') ?? false;
+        $user = self::getCurrentUser();
+
+        return self::hasPrivilegedAccess() || ($user?->can('delete-shipments') ?? false);
     }
 }
 
