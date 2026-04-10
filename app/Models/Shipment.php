@@ -88,6 +88,9 @@ class Shipment extends Model
         'cert_date',
         'broker_name',
         'broker_phone',
+        'bill_of_lading_method',
+        'bill_of_lading_data',
+        'bill_of_lading_pdf',
         'compliance_documents',
     ];
 
@@ -103,6 +106,7 @@ class Shipment extends Model
         'related' => 'array',
         'officer' => 'array',
         'compliance_documents' => 'array',
+        'bill_of_lading_data' => 'array',
     ];
 
     public const STATUS_PENDING = 'pending';

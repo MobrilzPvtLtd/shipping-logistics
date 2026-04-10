@@ -6,9 +6,13 @@ use App\Filament\Resources\ShipmentResource\Pages;
 use App\Filament\Resources\ShipmentResource\RelationManagers\InvoicesRelationManager;
 use App\Filament\Resources\ShipmentResource\RelationManagers\PackagesRelationManager;
 use App\Models\Shipment;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -51,6 +55,53 @@ class ShipmentResource extends Resource
                 Textarea::make('destination_address')
                     ->label('Destination Address')
                     ->rows(3),
+                Section::make('Bill of Lading')
+                    ->description('Admin-only bill of lading entry: structured form or direct PDF upload.')
+                    ->schema([
+                        Select::make('bill_of_lading_method')
+                            ->label('Bill of Lading Entry')
+                            ->options([
+                                'structured' => 'Structured BL form',
+                                'upload' => 'Upload completed BL PDF',
+                            ])
+                            ->default('structured')
+                            ->reactive()
+                            ->required()
+                            ->visible(fn (): bool => self::getCurrentUser()?->hasAnyRole(['Admin', 'Super Admin']) ?? false),
+                        TextInput::make('bill_of_lading_data.bl_number')
+                            ->label('B/L Number')
+                            ->maxLength(255)
+                            ->visible(fn (Get $get): bool => $get('bill_of_lading_method') === 'structured'),
+                        DatePicker::make('bill_of_lading_data.bl_date')
+                            ->label('B/L Date')
+                            ->visible(fn (Get $get): bool => $get('bill_of_lading_method') === 'structured'),
+                        TextInput::make('bill_of_lading_data.carrier_name')
+                            ->label('Carrier')
+                            ->maxLength(255)
+                            ->visible(fn (Get $get): bool => $get('bill_of_lading_method') === 'structured'),
+                        TextInput::make('bill_of_lading_data.port_of_loading')
+                            ->label('Port of Loading')
+                            ->maxLength(255)
+                            ->visible(fn (Get $get): bool => $get('bill_of_lading_method') === 'structured'),
+                        TextInput::make('bill_of_lading_data.port_of_discharge')
+                            ->label('Port of Discharge')
+                            ->maxLength(255)
+                            ->visible(fn (Get $get): bool => $get('bill_of_lading_method') === 'structured'),
+                        Textarea::make('bill_of_lading_data.goods_description')
+                            ->label('Goods Description')
+                            ->rows(4)
+                            ->visible(fn (Get $get): bool => $get('bill_of_lading_method') === 'structured'),
+                        FileUpload::make('bill_of_lading_pdf')
+                            ->label('Bill of Lading PDF')
+                            ->directory('bill-of-lading')
+                            ->disk('public')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->maxSize(10240)
+                            ->visible(fn (Get $get): bool => $get('bill_of_lading_method') === 'upload')
+                            ->columnSpan('full'),
+                    ])
+                    ->visible(fn (): bool => self::getCurrentUser()?->hasAnyRole(['Admin', 'Super Admin']) ?? false)
+                    ->columnSpan('full'),
                 View::make('filament.shipments.compliance-documents')
                     ->visible(fn (?string $operation): bool => $operation === 'view')
                     ->columnSpan('full'),
