@@ -10,7 +10,7 @@
                     {{ __("To turn these lines into a professional, persuasive brand message, we need to shift the tone from 'functional instructions' to a 'premium service' that solves the user's biggest headache: the high cost and complexity of island shipping.") }}
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="/blog" wire:navigate
+                    {{-- <a href="/blog" wire:navigate
                         class="inline-flex items-center px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors">
                         <span>{{ __('View Blog') }}</span>
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +38,7 @@
                             </path>
                         </svg>
                         <span>{{ __('Warehouse') }}</span>
-                    </a>
+                    </a> --}}
 
                     @auth
                         <a href="{{ route('shipments.create') }}" class="inline-flex items-center px-8 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
