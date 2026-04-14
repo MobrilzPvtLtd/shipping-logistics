@@ -5,6 +5,8 @@ namespace Modules\Shipment\Filament\Resources;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -29,8 +31,9 @@ class ShipmentResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Forms\Components\Card::make([
-                Forms\Components\Grid::make(2)->schema([
+            Section::make('Shipment Details')
+                ->schema([
+                    Grid::make(2)->schema([
                     Forms\Components\TextInput::make('invoice_number')
                         ->required()
                         ->maxLength(255),
