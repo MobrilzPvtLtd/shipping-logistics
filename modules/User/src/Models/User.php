@@ -54,6 +54,16 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         ];
     }
 
+    public function detail(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserDetail::class);
+    }
+
+    public function hasCompletedDetails(): bool
+    {
+        return (bool) ($this->detail && $this->detail->completed_at);
+    }
+
     /**
      * Determine if user can access a Filament panel by panel id.
      */

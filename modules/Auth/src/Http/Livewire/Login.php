@@ -61,25 +61,31 @@ class Login extends Component
         session()->forget('url.intended');
 
         Log::info('Login successful', ['email' => $this->email]);
+        $successMessage = 'Login successful! Redirecting you now.';
 
         // Redirect based on role
         if ($user->hasRole('Super Admin')) {
             Log::info('Redirecting to /super-admin');
-            return redirect('/super-admin');
+            return redirect('/super-admin')->with('status', $successMessage);
         }
 
         if ($user->hasRole('Warehouse Staff')) {
             Log::info('Redirecting to /warehouse');
-            return redirect('/warehouse');
+            return redirect('/warehouse')->with('status', $successMessage);
         }
 
         if ($user->hasAnyRole(['Admin', 'Editor'])) {
             Log::info('Redirecting to /admin');
-            return redirect('/admin');
+            return redirect('/admin')->with('status', $successMessage);
+        }
+
+        if (! $user->hasCompletedDetails()) {
+            Log::info('Redirecting to user details completion page for incomplete user', ['email' => $this->email]);
+            return redirect()->route('user.details.complete')->with('status', 'Please complete your details before continuing.');
         }
 
         Log::info('Redirecting to /dashboard');
-        return redirect('/dashboard');
+        return redirect('/dashboard')->with('status', $successMessage);
     }
 
     public function render()

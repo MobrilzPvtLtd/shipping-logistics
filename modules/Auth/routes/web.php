@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\URL;
 use Modules\User\Models\User;
 use Modules\Auth\Http\Livewire\Login;
 use Modules\Auth\Http\Livewire\Register;
+use Modules\Auth\Http\Controllers\UserDetailsController;
 use Modules\Auth\Http\Livewire\ForgotPassword;
 use Modules\Auth\Http\Livewire\ResetPassword;
 use Modules\Auth\Http\Livewire\Dashboard;
@@ -45,6 +46,10 @@ Route::middleware(['web'])->group(function () {
         Auth::login($user);
         session()->regenerate();
 
+        if (! $user->detail || ! $user->detail->completed_at) {
+            return redirect()->route('user.details.complete')->with('status', 'Your email has been verified. Please complete your details before continuing.');
+        }
+
         return redirect('/dashboard')->with('status', 'Your email has been verified and you are now logged in.');
     })->middleware(['signed'])->name('verification.verify');
 
@@ -70,26 +75,16 @@ Route::middleware(['web'])->group(function () {
 });
 
 Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/user-details', [UserDetailsController::class, 'show'])
+        ->name('user.details.complete')
+        ->middleware('verified');
+
+    Route::post('/user-details', [UserDetailsController::class, 'store'])
+        ->name('user.details.store')
+        ->middleware('verified');
+
     Route::get('/dashboard', Dashboard::class)->name('dashboard')->middleware('verified');
     Route::get('/profile', \Modules\Auth\Http\Livewire\Profile::class)->name('profile');
-
-    Route::get('/shipments', [\App\Http\Controllers\ShipmentController::class, 'index'])->name('shipments.index');
-    Route::get('/shipments/create', [\App\Http\Controllers\ShipmentController::class, 'create'])->name('shipments.create');
-    Route::post('/shipments', [\App\Http\Controllers\ShipmentController::class, 'store'])->name('shipments.store');
-    Route::get('/shipments/{shipment}/edit', [\App\Http\Controllers\ShipmentController::class, 'edit'])->name('shipments.edit');
-    Route::put('/shipments/{shipment}', [\App\Http\Controllers\ShipmentController::class, 'update'])->name('shipments.update');
-    Route::delete('/shipments/{shipment}', [\App\Http\Controllers\ShipmentController::class, 'destroy'])->name('shipments.destroy');
-
-    Route::get('/shipments/{shipment}/invoices', [\App\Http\Controllers\InvoiceController::class, 'index'])->name('shipments.invoices.index');
-    Route::get('/shipments/{shipment}/invoices/create', [\App\Http\Controllers\InvoiceController::class, 'create'])->name('shipments.invoices.create');
-    Route::post('/shipments/{shipment}/invoices', [\App\Http\Controllers\InvoiceController::class, 'store'])->name('shipments.invoices.store');
-    Route::get('/shipments/{shipment}/invoices/{invoice}/edit', [\App\Http\Controllers\InvoiceController::class, 'edit'])->name('shipments.invoices.edit');
-    Route::put('/shipments/{shipment}/invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'update'])->name('shipments.invoices.update');
-    Route::get('/shipments/{shipment}/invoices/{invoice}/download', [\App\Http\Controllers\InvoiceController::class, 'download'])->name('shipments.invoices.download');
-    Route::delete('/shipments/{shipment}/invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'destroy'])->name('shipments.invoices.destroy');
-
-    Route::get('/shipments/{shipment}/compliance-documents', [\App\Http\Controllers\ComplianceDocumentController::class, 'index'])->name('shipments.compliance-documents.index');
-    Route::get('/shipments/{shipment}/compliance-documents/{key}/download', [\App\Http\Controllers\ComplianceDocumentController::class, 'download'])->name('shipments.compliance-documents.download');
 });
 
 Route::post('/logout', function () {

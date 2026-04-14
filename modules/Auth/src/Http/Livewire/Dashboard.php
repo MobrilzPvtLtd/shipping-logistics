@@ -2,8 +2,6 @@
 
 namespace Modules\Auth\Http\Livewire;
 
-use App\Models\Shipment;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -12,10 +10,17 @@ use Livewire\Attributes\Title;
 #[Title('Dashboard')]
 class Dashboard extends Component
 {
+    public function mount()
+    {
+        $user = auth()->user();
+
+        if ($user && ! $user->hasCompletedDetails()) {
+            return redirect()->route('user.details.complete');
+        }
+    }
+
     public function render()
     {
-        $shipments = Shipment::where('user_id', Auth::id())->latest()->take(5)->get();
-
-        return view('auth::livewire.dashboard', compact('shipments'));
+        return view('auth::livewire.dashboard');
     }
 }

@@ -32,23 +32,6 @@ class RolePermissionSeeder extends Seeder
             'publish-blog',
             'view-settings',
             'edit-settings',
-            'view-media',
-            'upload-media',
-            'delete-media',
-            'view-shipments',
-            'create-shipments',
-            'edit-shipments',
-            'delete-shipments',
-            'view-invoices',
-            'create-invoices',
-            'edit-invoices',
-            'delete-invoices',
-            'view-compliance-documents',
-            'upload-compliance-documents',
-            'view-packages',
-            'create-packages',
-            'edit-packages',
-            'delete-packages',
         ];
 
         foreach ($permissions as $permission) {
@@ -75,58 +58,16 @@ class RolePermissionSeeder extends Seeder
             'publish-blog',
             'view-settings',
             'edit-settings',
-            'view-shipments',
-            'create-shipments',
-            'edit-shipments',
-            'delete-shipments',
-            'view-invoices',
-            'create-invoices',
-            'edit-invoices',
-            'delete-invoices',
-            'view-compliance-documents',
-            'upload-compliance-documents',
-            'view-packages',
-            'create-packages',
-            'edit-packages',
-            'delete-packages',
         ]);
 
         $warehouseRole = Role::firstOrCreate(['name' => 'Warehouse Staff']);
         $warehouseRole->syncPermissions([
             'view-blog',
-            'view-media',
-            'upload-media',
-            'view-shipments',
-            'create-shipments',
-            'edit-shipments',
-            'view-invoices',
-            'create-invoices',
-            'edit-invoices',
-            'delete-invoices',
-            'view-compliance-documents',
-            'view-packages',
-            'create-packages',
-            'edit-packages',
-            'delete-packages',
         ]);
 
         $userRole = Role::firstOrCreate(['name' => 'User']);
         $userRole->syncPermissions([
             'view-blog',
-            'view-shipments',
-            'create-shipments',
-            'edit-shipments',
-            'delete-shipments',
-            'view-invoices',
-            'create-invoices',
-            'edit-invoices',
-            'delete-invoices',
-            'view-compliance-documents',
-            'upload-compliance-documents',
-            'view-packages',
-            'create-packages',
-            'edit-packages',
-            'delete-packages',
         ]);
 
         // Assign Admin role to existing admin user

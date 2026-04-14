@@ -12,9 +12,25 @@
             </p>
         </div>
 
-        @if($status)
+        @if ($status)
             <div class="rounded-md bg-green-50 dark:bg-green-900/20 p-4 mb-4">
                 <p class="text-sm text-green-800 dark:text-green-200">{{ $status }}</p>
+            </div>
+        @endif
+
+        @if (session()->has('status'))
+            <div class="rounded-md bg-green-50 dark:bg-green-900/20 p-4 mb-4">
+                <p class="text-sm text-green-800 dark:text-green-200">{{ session('status') }}</p>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-4 mb-4">
+                <ul class="list-disc pl-5 text-sm text-red-700 dark:text-red-200">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
@@ -22,28 +38,28 @@
             <div class="rounded-md shadow-sm space-y-4">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Name') }}</label>
-                    <input wire:model="name" id="name" name="name" type="text" required 
+                    <input wire:model="name" id="name" name="name" type="text" required
                         class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
                     @error('name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Email address') }}</label>
-                    <input wire:model="email" id="email" name="email" type="email" autocomplete="email" required 
+                    <input wire:model="email" id="email" name="email" type="email" autocomplete="email" required
                         class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
                     @error('email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Password') }}</label>
-                    <input wire:model="password" id="password" name="password" type="password" required 
+                    <input wire:model="password" id="password" name="password" type="password" required
                         class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
                     @error('password') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
                     <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Confirm Password') }}</label>
-                    <input wire:model="password_confirmation" id="password_confirmation" name="password_confirmation" type="password" required 
+                    <input wire:model="password_confirmation" id="password_confirmation" name="password_confirmation" type="password" required
                         class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
                 </div>
             </div>

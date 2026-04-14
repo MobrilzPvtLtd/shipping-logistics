@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use Modules\User\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 #[Layout('core::layouts.app')]
 #[Title('Register')]
@@ -36,14 +37,17 @@ class Register extends Component
             'password' => Hash::make($this->password),
         ]);
 
+        Role::firstOrCreate(['name' => 'User']);
+        $user->assignRole('User');
+
         $user->sendEmailVerificationNotification();
 
-        $this->status = 'Registration successful! Verification email sent to ' . $this->email;
+        session()->flash('status', 'Registration successful! Please check your email and verify within 5 minutes.');
 
         // logout first to allow redirect to login for unverified user path
         Auth::logout();
 
-        return redirect()->route('login')->with('status', 'Registration successful! Please check your email and verify within 5 minutes.');
+        return redirect()->route('login');
     }
 
     public function render()
