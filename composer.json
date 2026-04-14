@@ -34,6 +34,7 @@
             "Modules\\Settings\\Database\\Seeders\\": "modules/Settings/database/seeders/",
             "Modules\\UIShowcase\\": "modules/UIShowcase/src/",
             "Modules\\User\\": "modules/User/src/",
+            "Modules\\Shipment\\": "modules/Shipment/src/",
             "Modules\\User\\Database\\Factories\\": "modules/User/database/factories/",
             "Modules\\User\\Database\\Seeders\\": "modules/User/database/seeders/",
             "Database\\Factories\\": "database/factories/",

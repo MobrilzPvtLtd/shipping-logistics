@@ -80,6 +80,7 @@ return array(
     'Modules\\User\\Database\\Factories\\' => array($baseDir . '/modules/User/database/factories'),
     'Modules\\User\\' => array($baseDir . '/modules/User/src'),
     'Modules\\UIShowcase\\' => array($baseDir . '/modules/UIShowcase/src'),
+    'Modules\\Shipment\\' => array($baseDir . '/modules/Shipment/src'),
     'Modules\\Settings\\Database\\Seeders\\' => array($baseDir . '/modules/Settings/database/seeders'),
     'Modules\\Settings\\' => array($baseDir . '/modules/Settings/src'),
     'Modules\\Core\\' => array($baseDir . '/modules/Core/src'),

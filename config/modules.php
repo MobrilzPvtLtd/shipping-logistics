@@ -32,5 +32,10 @@ return [
             'namespace' => 'Modules\Media',
             'provider' => 'Modules\Media\MediaServiceProvider',
         ],
+        'Shipment' => [
+            'enabled' => true,
+            'namespace' => 'Modules\Shipment',
+            'provider' => 'Modules\Shipment\ShipmentServiceProvider',
+        ],
     ],
 ];

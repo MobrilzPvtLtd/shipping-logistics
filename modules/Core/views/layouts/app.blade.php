@@ -33,6 +33,11 @@
                                 <a href="/blog" wire:navigate class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition">
                                     {{ __('Blog') }}
                                 </a>
+                                @can('view-shipments')
+                                    <a href="{{ route('shipments.index') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition">
+                                        {{ __('Shipments') }}
+                                    </a>
+                                @endcan
 
                             </div>
                         </div>

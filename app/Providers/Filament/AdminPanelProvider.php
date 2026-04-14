@@ -9,6 +9,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use App\Filament\Widgets\ShipmentWidget;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -42,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->font('Inter')
             ->resources([
                 \Modules\Blog\Filament\Resources\BlogResource::class,
+                \Modules\Shipment\Filament\Resources\ShipmentResource::class,
                 \Modules\User\Filament\Resources\UserResource::class,
                 \Modules\User\Filament\Resources\Roles\RoleResource::class,
                 \Modules\User\Filament\Resources\Permissions\PermissionResource::class,
@@ -54,6 +56,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
+                // ShipmentWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

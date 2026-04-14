@@ -107,6 +107,28 @@
                             <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Read latest articles') }}</p>
                         </div>
                     </a>
+                    @can('view-shipments')
+                        <a href="{{ route('shipments.index') }}" wire:navigate class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                            <svg class="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ __('My Shipments') }}</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('View and manage your shipments') }}</p>
+                            </div>
+                        </a>
+                    @endcan
+                    @can('create-shipments')
+                        <a href="{{ route('shipments.create') }}" wire:navigate class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                            <svg class="h-6 w-6 text-indigo-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <div>
+                                <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ __('Create Shipment') }}</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Generate a new shipment invoice') }}</p>
+                            </div>
+                        </a>
+                    @endcan
                 </div>
             </div>
         </div>

@@ -32,6 +32,10 @@ class RolePermissionSeeder extends Seeder
             'publish-blog',
             'view-settings',
             'edit-settings',
+            'view-shipments',
+            'create-shipments',
+            'edit-shipments',
+            'delete-shipments',
         ];
 
         foreach ($permissions as $permission) {
@@ -58,16 +62,26 @@ class RolePermissionSeeder extends Seeder
             'publish-blog',
             'view-settings',
             'edit-settings',
+            'view-shipments',
+            'create-shipments',
+            'edit-shipments',
+            'delete-shipments',
         ]);
 
         $warehouseRole = Role::firstOrCreate(['name' => 'Warehouse Staff']);
         $warehouseRole->syncPermissions([
             'view-blog',
+            'view-shipments',
+            'create-shipments',
+            'edit-shipments',
+            'delete-shipments',
         ]);
 
         $userRole = Role::firstOrCreate(['name' => 'User']);
         $userRole->syncPermissions([
             'view-blog',
+            'view-shipments',
+            'create-shipments',
         ]);
 
         // Assign Admin role to existing admin user

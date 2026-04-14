@@ -9,6 +9,7 @@ return [
     Modules\Core\CoreServiceProvider::class,
     Modules\Blog\BlogServiceProvider::class,
     Modules\Settings\SettingsServiceProvider::class,
+    Modules\Shipment\ShipmentServiceProvider::class,
     Modules\UIShowcase\UIShowcaseServiceProvider::class,
     Modules\User\UserServiceProvider::class,
 ];
