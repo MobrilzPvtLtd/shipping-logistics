@@ -15,6 +15,9 @@ class Shipment extends Model
         'invoice_date',
         'invoice_number',
         'invoice_file_path',
+        'bill_of_lading_file_path',
+        'bill_of_lading_data',
+        'excise_tax_data',
         'exporter_name',
         'exporter_address',
         'exporter_city_zip',
@@ -50,6 +53,8 @@ class Shipment extends Model
         'invoice_date' => 'date',
         'signature_date' => 'date',
         'commodities' => 'array',
+        'bill_of_lading_data' => 'array',
+        'excise_tax_data' => 'array',
     ];
 
     public function user()
