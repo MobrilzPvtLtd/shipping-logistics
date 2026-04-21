@@ -29,7 +29,7 @@ class EnsureFilamentPanelRole
             abort(403, 'Only Admin can access this panel.');
         }
 
-        if ($prefix === 'warehouse' && ! $user->hasRole('Warehouse Staff')) {
+        if ($prefix === 'warehouse' && ! $user->hasAnyRole('Warehouse Staff', 'User')) {
             abort(403, 'Only Warehouse Staff can access this panel.');
         }
 

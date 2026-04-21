@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\ShipmentWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -9,7 +10,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use App\Filament\Widgets\ShipmentWidget;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -17,8 +17,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Settings\Models\Setting;
 
 class AdminPanelProvider extends PanelProvider
@@ -34,8 +35,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('LaraCoreKit - Admin')
             ->brandLogo($this->resolveBrandLogo())
             ->darkMode(true)
-            ->renderHook('panels::topbar.end', fn() => view('filament.dark-mode-toggle'))
-            ->renderHook('panels::body.end', fn() => view('filament.login-placeholders'))
+            ->renderHook('panels::topbar.end', fn () => view('filament.dark-mode-toggle'))
+            ->renderHook('panels::body.end', fn () => view('filament.login-placeholders'))
             ->colors([
                 'primary' => Color::Red,
                 'danger' => Color::Red,
@@ -44,6 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ->resources([
                 \Modules\Blog\Filament\Resources\BlogResource::class,
                 \Modules\Shipment\Filament\Resources\ShipmentResource::class,
+                \Modules\Package\Filament\Resources\PackageResource::class,
                 \Modules\User\Filament\Resources\UserResource::class,
                 \Modules\User\Filament\Resources\Roles\RoleResource::class,
                 \Modules\User\Filament\Resources\Permissions\PermissionResource::class,
@@ -77,9 +79,14 @@ class AdminPanelProvider extends PanelProvider
 
     private function resolveBrandLogo(): string
     {
-        $logo = Setting::get('site_logo');
+        $logo = null;
 
-        if (!empty($logo)) {
+        if (Schema::hasTable('settings')) {
+            $setting = Setting::where('key', 'site_logo')->first();
+            $logo = $setting?->value;
+        }
+
+        if (! empty($logo)) {
             if (filter_var($logo, FILTER_VALIDATE_URL)) {
                 return $logo;
             }
@@ -88,7 +95,6 @@ class AdminPanelProvider extends PanelProvider
                 return asset("storage/{$logo}");
             }
 
-            // If file path is already a storage URL or relative path, attempt direct URL
             return asset($logo);
         }
 

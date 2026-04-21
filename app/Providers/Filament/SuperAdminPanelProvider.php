@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\ShipmentWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -9,7 +10,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use App\Filament\Widgets\ShipmentWidget;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -17,10 +17,10 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Settings\Models\Setting;
-
+use Illuminate\Support\Facades\Schema;
 class SuperAdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -41,6 +41,7 @@ class SuperAdminPanelProvider extends PanelProvider
             ->resources([
                 \Modules\Blog\Filament\Resources\BlogResource::class,
                 \Modules\Shipment\Filament\Resources\ShipmentResource::class,
+                \Modules\Package\Filament\Resources\PackageResource::class,
                 \Modules\User\Filament\Resources\UserResource::class,
                 \Modules\User\Filament\Resources\Roles\RoleResource::class,
                 \Modules\User\Filament\Resources\Permissions\PermissionResource::class,
@@ -74,9 +75,14 @@ class SuperAdminPanelProvider extends PanelProvider
 
     private function resolveBrandLogo(): string
     {
-        $logo = Setting::get('site_logo');
+        $logo = null;
 
-        if (!empty($logo)) {
+        if (Schema::hasTable('settings')) {
+            $setting = Setting::where('key', 'site_logo')->first();
+            $logo = $setting?->value;
+        }
+
+        if (! empty($logo)) {
             if (filter_var($logo, FILTER_VALIDATE_URL)) {
                 return $logo;
             }

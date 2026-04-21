@@ -4,6 +4,7 @@ namespace Modules\Shipment\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Package\Models\Package;
 
 class Shipment extends Model
 {
@@ -54,5 +55,10 @@ class Shipment extends Model
     public function user()
     {
         return $this->belongsTo(\Modules\User\Models\User::class);
+    }
+
+    public function packages()
+    {
+        return $this->hasMany(Package::class);
     }
 }

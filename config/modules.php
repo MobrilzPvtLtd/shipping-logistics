@@ -37,5 +37,10 @@ return [
             'namespace' => 'Modules\Shipment',
             'provider' => 'Modules\Shipment\ShipmentServiceProvider',
         ],
+        'Package' => [
+            'enabled' => true,
+            'namespace' => 'Modules\Package',
+            'provider' => 'Modules\Package\PackageServiceProvider',
+        ],
     ],
 ];

@@ -63,19 +63,70 @@
                         <tbody>
                             @foreach ($shipment->commodities as $commodity)
                                 <tr>
-                                    <td class="border border-black p-2">{{ $commodity['commodity_description'] }}</td>
-                                    <td class="border border-black p-2">{{ $commodity['hs_code'] }}</td>
-                                    <td class="border border-black p-2">{{ $commodity['country_of_manufacture'] }}</td>
-                                    <td class="border border-black p-2">{{ $commodity['quantity'] }}</td>
-                                    <td class="border border-black p-2">{{ $commodity['uom'] }}</td>
-                                    <td class="border border-black p-2">{{ $commodity['unit_price'] }}</td>
-                                    <td class="border border-black p-2">{{ $commodity['line_total'] }}</td>
+                                    <td class="border border-black p-2">{{ data_get($commodity, 'commodity_description') ?? data_get($commodity, 'description') ?? '-' }}</td>
+                                    <td class="border border-black p-2">{{ data_get($commodity, 'hs_code') ?? '-' }}</td>
+                                    <td class="border border-black p-2">{{ data_get($commodity, 'country_of_manufacture') ?? '-' }}</td>
+                                    <td class="border border-black p-2">{{ data_get($commodity, 'quantity') ?? '-' }}</td>
+                                    <td class="border border-black p-2">{{ data_get($commodity, 'uom') ?? '-' }}</td>
+                                    <td class="border border-black p-2">{{ data_get($commodity, 'unit_price') ?? data_get($commodity, 'value') ?? '-' }}</td>
+                                    <td class="border border-black p-2">{{ data_get($commodity, 'line_total') ?? data_get($commodity, 'value') ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 @else
                     <p class="text-sm text-gray-500">{{ __('No commodities were saved.') }}</p>
+                @endif
+            </div>
+
+            <div>
+                <p class="text-xs uppercase tracking-widest text-gray-500">{{ __('Packages') }}</p>
+                @if ($shipment->packages->isNotEmpty())
+                    <table class="w-full text-left text-[11px] border-collapse border border-black">
+                        <thead>
+                            <tr>
+                                <th class="border border-black p-2">{{ __('Units') }}</th>
+                                <th class="border border-black p-2">{{ __('L (cm)') }}</th>
+                                <th class="border border-black p-2">{{ __('W (cm)') }}</th>
+                                <th class="border border-black p-2">{{ __('H (cm)') }}</th>
+                                <th class="border border-black p-2">{{ __('Weight (kg)') }}</th>
+                                <th class="border border-black p-2">{{ __('Notes') }}</th>
+                                <th class="border border-black p-2">{{ __('Photos') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($shipment->packages as $package)
+                                <tr>
+                                    <td class="border border-black p-2">{{ $package->units }}</td>
+                                    <td class="border border-black p-2">{{ $package->length_cm }}</td>
+                                    <td class="border border-black p-2">{{ $package->width_cm }}</td>
+                                    <td class="border border-black p-2">{{ $package->height_cm }}</td>
+                                    <td class="border border-black p-2">{{ $package->weight_kg }}</td>
+                                    <td class="border border-black p-2">{{ $package->condition_notes ?? '-' }}</td>
+                                    <td class="border border-black p-2">
+                                        @php($photos = is_array($package->photos) ? $package->photos : [])
+                                        @if (count($photos))
+                                            <div class="flex items-center gap-2">
+                                                @foreach (array_slice($photos, 0, 3) as $photo)
+                                                    <a href="{{ asset('storage/' . $photo) }}" target="_blank">
+                                                        <img src="{{ asset('storage/' . $photo) }}" alt="Package photo"
+                                                            class="h-8 w-8 object-cover border border-black">
+                                                    </a>
+                                                @endforeach
+                                                @if (count($photos) > 3)
+                                                    <span class="text-gray-500">+{{ count($photos) - 3 }}</span>
+                                                @endif
+                                            </div>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @else
+                    <p class="text-sm text-gray-500">{{ __('No packages were saved.') }}</p>
                 @endif
             </div>
         </div>

@@ -157,6 +157,8 @@ class ShipmentController extends Controller
             abort(403);
         }
 
+        $shipment->load('packages');
+
         return view('shipment::show', compact('shipment'));
     }
 }

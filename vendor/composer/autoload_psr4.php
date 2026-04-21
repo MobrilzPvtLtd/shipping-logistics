@@ -83,6 +83,7 @@ return array(
     'Modules\\Shipment\\' => array($baseDir . '/modules/Shipment/src'),
     'Modules\\Settings\\Database\\Seeders\\' => array($baseDir . '/modules/Settings/database/seeders'),
     'Modules\\Settings\\' => array($baseDir . '/modules/Settings/src'),
+    'Modules\\Package\\' => array($baseDir . '/modules/Package/src'),
     'Modules\\Core\\' => array($baseDir . '/modules/Core/src'),
     'Modules\\Blog\\Database\\Seeders\\' => array($baseDir . '/modules/Blog/database/seeders'),
     'Modules\\Blog\\' => array($baseDir . '/modules/Blog/src'),

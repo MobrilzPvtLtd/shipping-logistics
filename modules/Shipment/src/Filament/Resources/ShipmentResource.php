@@ -17,7 +17,8 @@ use Modules\Shipment\Filament\Resources\Pages\ListShipments;
 use Modules\Shipment\Filament\Resources\Pages\ViewShipment;
 use Modules\Shipment\Models\Shipment;
 use UnitEnum;
-
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 class ShipmentResource extends Resource
 {
     protected static ?string $model = Shipment::class;
@@ -77,6 +78,44 @@ class ShipmentResource extends Resource
                     ->minItems(1)
                     ->columnSpan('full'),
             ]),
+            Section::make('Packages')
+                ->schema([
+                    Forms\Components\Repeater::make('packages')
+                        ->relationship()
+                        ->schema([
+                            Forms\Components\TextInput::make('units')
+                                ->required()
+                                ->numeric()
+                                ->minValue(1),
+                            Forms\Components\TextInput::make('length_cm')
+                                ->required()
+                                ->numeric()
+                                ->step('0.01'),
+                            Forms\Components\TextInput::make('width_cm')
+                                ->required()
+                                ->numeric()
+                                ->step('0.01'),
+                            Forms\Components\TextInput::make('height_cm')
+                                ->required()
+                                ->numeric()
+                                ->step('0.01'),
+                            Forms\Components\TextInput::make('weight_kg')
+                                ->required()
+                                ->numeric()
+                                ->step('0.01'),
+                            Forms\Components\Textarea::make('condition_notes')
+                                ->columnSpanFull(),
+                            Forms\Components\FileUpload::make('photos')
+                                ->image()
+                                ->multiple()
+                                ->reorderable()
+                                ->disk('public')
+                                ->directory('package-photos')
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2)
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 
@@ -107,6 +146,10 @@ class ShipmentResource extends Resource
             ])
             ->filters([
                 // Add filters here if needed
+            ])
+            ->actions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
             ->defaultSort('invoice_date', 'desc');
     }
