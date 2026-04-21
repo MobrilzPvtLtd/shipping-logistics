@@ -98,7 +98,7 @@
                     {{ __('Quick Actions') }}
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <a href="/blog" wire:navigate class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                    {{-- <a href="/blog" wire:navigate class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                         <svg class="h-6 w-6 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                         </svg>
@@ -106,7 +106,7 @@
                             <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ __('Browse Blog') }}</h4>
                             <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Read latest articles') }}</p>
                         </div>
-                    </a>
+                    </a> --}}
                     @can('view-shipments')
                         <a href="{{ route('shipments.index') }}" wire:navigate class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition">
                             <svg class="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
