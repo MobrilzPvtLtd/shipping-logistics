@@ -30,9 +30,9 @@
                                 <a href="/" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition">
                                     {{ __('Home') }}
                                 </a>
-                                <a href="/blog" wire:navigate class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition">
+                                {{-- <a href="/blog" wire:navigate class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition">
                                     {{ __('Blog') }}
-                                </a>
+                                </a> --}}
                                 @can('view-shipments')
                                     <a href="{{ route('shipments.index') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition">
                                         {{ __('Shipments') }}

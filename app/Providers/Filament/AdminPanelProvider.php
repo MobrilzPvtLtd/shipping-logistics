@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('Inter')
             ->resources([
-                \Modules\Blog\Filament\Resources\BlogResource::class,
+                // \Modules\Blog\Filament\Resources\BlogResource::class,
                 \Modules\Shipment\Filament\Resources\ShipmentResource::class,
                 \Modules\Package\Filament\Resources\PackageResource::class,
                 \Modules\User\Filament\Resources\UserResource::class,
